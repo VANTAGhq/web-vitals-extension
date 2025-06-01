@@ -6,9 +6,9 @@
 
 <img src="media/cwv-extension-drilldown.png">
 
-This extension measures the three [Core Web Vitals](https://web.dev/articles/vitals) metrics in a way that matches how they're measured by Chrome and reported to other Google tools (e.g. [Chrome User Experience Report](https://developer.chrome.com/docs/crux), [Page Speed Insights](https://developers.google.com/speed/pagespeed/insights/), [Search Console](https://search.google.com/search-console/about)).
+This extension measures the three [Core Web Vitals](https://jmfernandez.dev/web-vitals-extension/) metrics in a way that matches how they're measured by Chrome and reported to other Google tools (e.g. [Chrome User Experience Report](https://developer.chrome.com/docs/crux), [Page Speed Insights](https://developers.google.com/speed/pagespeed/insights/), [Search Console](https://search.google.com/search-console/about)).
 
-It supports all of the [Core Web Vitals](https://web.dev/articles/vitals/#core-web-vitals) and leverages the [web-vitals](https://github.com/GoogleChrome/web-vitals) library under the hood to capture:
+It supports all of the [Core Web Vitals](https://jmfernandez.dev/web-vitals-extension//#core-web-vitals) and leverages the [web-vitals](https://github.com/GoogleChrome/web-vitals) library under the hood to capture:
 
 * [Largest Contentful Paint](https://web.dev/articles/lcp)
 * [Cumulative Layout Shift](https://web.dev/articles/cls)
