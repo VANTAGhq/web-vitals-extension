@@ -14,12 +14,13 @@
 import { loadLocalMetrics, getOptions, getURL } from './chrome.js';
 import { CrUX } from './crux.js';
 import { LCP, INP, CLS, FCP, TTFB } from './metric.js';
+import { ServerInfo } from './server-info.js';
+import { DNSInfo } from './dns-info.js';
 
 class Popup {
 
   constructor({metrics, background, options, url, error}) {
     if (error) {
-      console.log(error);
       this.setStatus('Web Vitals are unavailable for this page.\n' + error);
       return;
     }
@@ -39,12 +40,146 @@ class Popup {
   }
 
   init() {
+    this.initTabs();
     this.initStatus();
     this.initPage();
     this.initTimestamp();
     this.initMetrics();
     this.initFieldData();
     this.showEOLNotice();
+  }
+
+  initTabs() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const targetTab = button.getAttribute('data-tab');
+        
+        // Remove active class from all buttons and contents
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Add active class to clicked button and corresponding content
+        button.classList.add('active');
+        document.getElementById(`${targetTab}-tab`).classList.add('active');
+
+        // Load server info if server tab is clicked
+        if (targetTab === 'server' && !this.serverInfoLoaded) {
+          this.loadServerInfo();
+        }
+
+        // Load DNS info if DNS tab is clicked
+        if (targetTab === 'dns' && !this.dnsInfoLoaded) {
+          this.loadDNSInfo();
+        }
+      });
+    });
+  }
+
+  async loadServerInfo() {
+    this.serverInfoLoaded = true;
+    const statusElement = document.getElementById('server-status');
+    
+    try {
+      statusElement.innerText = 'Loading server information...';
+      statusElement.style.backgroundColor = 'var(--color-light-grey)';
+      statusElement.style.color = 'var(--color-text-muted)';
+      
+      const startTime = performance.now();
+      const serverInfo = await ServerInfo.load(this.url);
+      const loadTime = Math.round(performance.now() - startTime);
+      
+      // Update all server info fields
+      document.getElementById('server-ip').innerText = serverInfo.ip;
+      document.getElementById('server-hostname').innerText = serverInfo.hostname;
+      document.getElementById('server-location').innerText = serverInfo.location;
+      document.getElementById('server-country').innerText = `${serverInfo.country} (${serverInfo.countryCode})`;
+      document.getElementById('server-city').innerText = serverInfo.city;
+      document.getElementById('server-region').innerText = serverInfo.region;
+      document.getElementById('server-postal').innerText = serverInfo.postal;
+      document.getElementById('server-timezone').innerText = serverInfo.timezone;
+      document.getElementById('server-coordinates').innerText = serverInfo.coordinates;
+      document.getElementById('server-isp').innerText = serverInfo.isp;
+      document.getElementById('server-org').innerText = serverInfo.org;
+      document.getElementById('server-asn').innerText = serverInfo.asn;
+      
+      // Check if there's a note (for partial success scenarios)
+      if (serverInfo.note) {
+        statusElement.innerText = `⚠️ ${serverInfo.note}`;
+        statusElement.style.backgroundColor = 'var(--color-needs-improvement)';
+        statusElement.style.color = 'white';
+      } else {
+        statusElement.innerText = `✓ Server information loaded successfully (${loadTime}ms)`;
+        statusElement.style.backgroundColor = 'var(--color-good)';
+        statusElement.style.color = 'white';
+      }
+    } catch (e) {
+      let errorMessage = e.message || 'Unable to load server information';
+      
+      statusElement.innerText = `❌ ${errorMessage}`;
+      statusElement.style.backgroundColor = 'var(--color-poor)';
+      statusElement.style.color = 'white';
+      
+      // Set all fields to error state
+      const errorFields = ['server-ip', 'server-hostname', 'server-location', 'server-country', 
+                          'server-city', 'server-region', 'server-postal', 'server-timezone',
+                          'server-coordinates', 'server-isp', 'server-org', 'server-asn'];
+      errorFields.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.innerText = 'Error';
+          element.style.color = 'var(--color-poor-text)';
+        }
+      });
+    }
+  }
+
+  async loadDNSInfo() {
+    this.dnsInfoLoaded = true;
+    const statusElement = document.getElementById('dns-status');
+    
+    try {
+      statusElement.innerText = 'Loading DNS records...';
+      statusElement.style.backgroundColor = 'var(--color-needs-improvement)';
+      statusElement.style.color = 'white';
+      
+      const startTime = performance.now();
+      const dnsInfo = await DNSInfo.load(this.url);
+      const loadTime = Math.round(performance.now() - startTime);
+      
+      // Update DNS info fields
+      document.getElementById('dns-domain').innerText = dnsInfo.domain;
+      document.getElementById('dns-a-record').innerText = dnsInfo.aRecord;
+      document.getElementById('dns-aaaa-record').innerText = dnsInfo.aaaaRecord;
+      document.getElementById('dns-cname').innerText = dnsInfo.cname;
+      document.getElementById('dns-mx').innerText = dnsInfo.mx;
+      document.getElementById('dns-ns').innerText = dnsInfo.ns;
+      document.getElementById('dns-txt').innerText = dnsInfo.txt;
+      document.getElementById('dns-soa').innerText = dnsInfo.soa;
+      
+      statusElement.innerText = `✓ DNS information loaded successfully (${loadTime}ms)`;
+      statusElement.style.backgroundColor = 'var(--color-good)';
+      statusElement.style.color = 'white';
+    } catch (e) {
+      let errorMessage = e.message || 'Unable to load DNS information';
+      
+      statusElement.innerText = `❌ ${errorMessage}`;
+      statusElement.style.backgroundColor = 'var(--color-poor)';
+      statusElement.style.color = 'white';
+      
+      // Set all fields to error state
+      const errorFields = ['dns-domain', 'dns-a-record', 'dns-aaaa-record', 'dns-cname', 
+                          'dns-mx', 'dns-ns', 'dns-txt', 'dns-soa'];
+      errorFields.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.innerText = 'Error';
+          element.style.color = 'var(--color-poor-text)';
+        }
+      });
+    }
   }
 
   initStatus() {
@@ -93,10 +228,8 @@ class Popup {
   initFieldData() {
     const formFactor = this.options.preferPhoneField ? CrUX.FormFactor.PHONE : CrUX.FormFactor.DESKTOP;
     CrUX.load(this.url, formFactor).then(fieldData => {
-      console.log('CrUX data', fieldData);
       this.renderFieldData(fieldData, formFactor);
-    }).catch(e => {
-      console.warn('Unable to load any CrUX data. See https://developer.chrome.com/blog/web-vitals-extension', e);
+    }).catch(() => {
       this.setStatus('Local metrics only (field data unavailable)');
     });
   }
@@ -176,7 +309,9 @@ class Popup {
     infoElement.title = info;
     infoElement.classList.toggle('hidden', info == '');
 
-    template.parentElement.appendChild(fragment);
+    // Append to metrics container instead of template parent
+    const metricsContainer = document.querySelector('.metrics-container');
+    metricsContainer.appendChild(fragment);
 
     requestAnimationFrame(_ => {
       // Check reversal before and after the transition is settled.

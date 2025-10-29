@@ -1,14 +1,75 @@
 > [!WARNING]
 > The Chrome team has been working hard to bring the best of the Web Vitals extension directly into the DevTools Performance panel. As of Chrome version 132, which became stable on January 7, 2025, we have finally ended support for the extension and encourage all users to [switch to DevTools](#devtools). Be aware that extension updates will stop and features may break without notice. [Learn more](https://developer.chrome.com/blog/web-vitals-extension)
 
-# Web Vitals Chrome Extension 
-*A Chrome extension to measure metrics for a healthy site* 
+# Web Vitals Chrome Extension Enhanced
+*A Chrome extension to measure Core Web Vitals metrics plus server and DNS information* 
 
 <img src="media/cwv-extension-drilldown.png">
 
-This extension measures the three [Core Web Vitals](https://jmfernandez.dev/web-vitals-extension/) metrics in a way that matches how they're measured by Chrome and reported to other Google tools (e.g. [Chrome User Experience Report](https://developer.chrome.com/docs/crux), [Page Speed Insights](https://developers.google.com/speed/pagespeed/insights/), [Search Console](https://search.google.com/search-console/about)).
+## 🚀 Enhanced Fork by jmfernxndez
 
-It supports all of the [Core Web Vitals](https://jmfernandez.dev/web-vitals-extension//#core-web-vitals) and leverages the [web-vitals](https://github.com/GoogleChrome/web-vitals) library under the hood to capture:
+This is an enhanced fork of the original Google Web Vitals Extension with powerful additional features for developers, sysadmins, and SEO professionals.
+
+### ✨ New Features
+
+#### 📊 Three-Tab Interface
+- **Web Vitals Tab**: All the original Core Web Vitals metrics with real-time monitoring
+- **Server Info Tab**: Comprehensive server and hosting information
+- **DNS Info Tab**: Complete DNS records analysis
+
+#### 🌍 Server Information
+Get detailed information about the website's hosting infrastructure:
+- **IP Address**: Server's public IPv4 address
+- **Geographic Location**: Country, city, region, and coordinates
+- **Timezone**: Server's timezone information
+- **ISP & Organization**: Internet Service Provider and organization details
+- **ASN**: Autonomous System Number
+- **Hostname**: Server hostname identification
+
+*Powered by ipwhois.app API*
+
+#### 🔍 DNS Information
+Complete DNS records analysis in one place:
+- **A Records**: IPv4 address resolution
+- **AAAA Records**: IPv6 address resolution
+- **CNAME Records**: Canonical name aliases
+- **MX Records**: Mail server configuration with priority
+- **NS Records**: Authoritative name servers
+- **TXT Records**: Text records (SPF, DKIM, DMARC, verifications)
+- **SOA Records**: Start of Authority information
+
+*Powered by Google DNS API*
+
+#### 📧 Support
+Found a bug or issue? Contact us directly at **me@jmfernandez.dev** via the footer contact icon.
+
+### 🎯 Use Cases
+
+**For Web Developers:**
+- Monitor Core Web Vitals in real-time
+- Verify server location and hosting setup
+- Debug DNS configuration issues
+- Check email deliverability (MX, SPF records)
+
+**For SEO Professionals:**
+- Analyze page performance metrics
+- Verify server location for local SEO
+- Check domain verification records
+- Audit competitor infrastructure
+
+**For System Administrators:**
+- Quick DNS record verification
+- Server geolocation confirmation
+- ISP and ASN information lookup
+- Infrastructure auditing
+
+---
+
+## Core Web Vitals Measurement
+
+This extension measures the three [Core Web Vitals](https://web.dev/vitals/) metrics in a way that matches how they're measured by Chrome and reported to other Google tools (e.g. [Chrome User Experience Report](https://developer.chrome.com/docs/crux), [Page Speed Insights](https://developers.google.com/speed/pagespeed/insights/), [Search Console](https://search.google.com/search-console/about)).
+
+It supports all of the [Core Web Vitals](https://web.dev/vitals/#core-web-vitals) and leverages the [web-vitals](https://github.com/GoogleChrome/web-vitals) library under the hood to capture:
 
 * [Largest Contentful Paint](https://web.dev/articles/lcp)
 * [Cumulative Layout Shift](https://web.dev/articles/cls)
@@ -112,6 +173,42 @@ npm update web-vitals --save
 1. Drag the `web-vitals-extension-main` folder anywhere on the page to import it (do not delete the folder afterwards).
 
 ## Usage
+
+### Three-Tab Interface
+
+This enhanced version includes three powerful tabs accessible from the extension popup:
+
+#### 1. Web Vitals Tab (Default)
+The original Core Web Vitals monitoring experience with ambient badge and detailed metrics.
+
+#### 2. Server Info Tab
+Click to view comprehensive server information including:
+- Geographic location and coordinates
+- ISP and hosting provider details
+- ASN and organization information
+- Server timezone
+
+**Use cases:**
+- Verify CDN configuration
+- Check server location for SEO
+- Audit hosting infrastructure
+- Debug geolocation issues
+
+#### 3. DNS Info Tab
+Click to analyze all DNS records for the current domain:
+- A/AAAA records for IP resolution
+- MX records for email configuration
+- NS records for DNS servers
+- TXT records for domain verification
+- SOA records for zone information
+
+**Use cases:**
+- Verify DNS propagation
+- Debug email delivery (SPF, DKIM, DMARC)
+- Check domain verification records
+- Audit DNS configuration
+
+All tabs support lazy loading - data is only fetched when you open the respective tab, ensuring optimal performance.
 
 ### Ambient badge
 

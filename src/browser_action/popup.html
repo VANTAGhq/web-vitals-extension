@@ -5,48 +5,183 @@
   </head>
   <body>
     <header>
-      <h1>Metrics</h1>
-
-      <div id="metadata" class="metadata">
-        <div id="status">Waiting for local data&hellip;</div>
-      </div>
+      <h1>Web Vitals Extension | <a href="http://jmfernandez.dev" target="_blank" rel="noopener noreferrer">jmfernxndez</a></h1>
     </header>
 
-    <main>
-      <template id="metric-template">
-        <div class="metric-wrapper">
-          <div class="metric">
-            <div class="metric-info">
-              <div class="metric-name">Metric Name</div>
-            </div>
+    <!-- Tab Navigation -->
+    <nav class="tab-navigation">
+      <button class="tab-button active" data-tab="vitals">Web Vitals</button>
+      <button class="tab-button" data-tab="server">Server Info</button>
+      <button class="tab-button" data-tab="dns">DNS Info</button>
+    </nav>
 
-            <div class="metric-performance metadata">
-              <div class="metric-performance-local">
-                <div class="metric-performance-local-value-wrapper">
-                  <div class="metric-performance-local-value">Waiting&hellip;</div>
-                  <div class="info hidden" title="">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M10 1.66669C5.4 1.66669 1.66666 5.40002 1.66666 10C1.66666 14.6 5.4 18.3334 10 18.3334C14.6 18.3334 18.3333 14.6 18.3333 10C18.3333 5.40002 14.6 1.66669 10 1.66669ZM10.8333 14.1667H9.16666V9.16669H10.8333V14.1667ZM10.8333 7.50002H9.16666V5.83335H10.8333V7.50002Z"/>
-                    </svg>
+    <!-- Web Vitals Tab -->
+    <main class="tab-content active" id="vitals-tab">
+      <div class="tab-header">
+        <div id="metadata" class="metadata">
+          <div id="status">Waiting for local data&hellip;</div>
+        </div>
+      </div>
+
+      <div class="metrics-container">
+        <template id="metric-template">
+          <div class="metric-wrapper">
+            <div class="metric">
+              <div class="metric-info">
+                <div class="metric-name">Metric Name</div>
+              </div>
+
+              <div class="metric-performance metadata">
+                <div class="metric-performance-local">
+                  <div class="metric-performance-local-value-wrapper">
+                    <div class="metric-performance-local-value">Waiting&hellip;</div>
+                    <div class="info hidden" title="">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 1.66669C5.4 1.66669 1.66666 5.40002 1.66666 10C1.66666 14.6 5.4 18.3334 10 18.3334C14.6 18.3334 18.3333 14.6 18.3333 10C18.3333 5.40002 14.6 1.66669 10 1.66669ZM10.8333 14.1667H9.16666V9.16669H10.8333V14.1667ZM10.8333 7.50002H9.16666V5.83335H10.8333V7.50002Z"/>
+                      </svg>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="metric-performance-distribution">
-                <div class="metric-performance-distribution-rating good">&nbsp;</div>
-                <div class="metric-performance-distribution-rating needs-improvement"></div>
-                <div class="metric-performance-distribution-rating poor"></div>
-              </div>
+                <div class="metric-performance-distribution">
+                  <div class="metric-performance-distribution-rating good">&nbsp;</div>
+                  <div class="metric-performance-distribution-rating needs-improvement"></div>
+                  <div class="metric-performance-distribution-rating poor"></div>
+                </div>
 
-              <div class="hovercard"></div>
+                <div class="hovercard"></div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </main>
+
+    <!-- Server Info Tab -->
+    <main class="tab-content" id="server-tab">
+      <div class="server-info-container">
+        <div class="server-info-section">
+          <h2>Server Information</h2>
+          <div id="server-status" class="metadata">Loading server information...</div>
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">IP Address</div>
+              <div class="info-value" id="server-ip">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Location</div>
+              <div class="info-value" id="server-location">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Country</div>
+              <div class="info-value" id="server-country">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">City</div>
+              <div class="info-value" id="server-city">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Region</div>
+              <div class="info-value" id="server-region">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Postal Code</div>
+              <div class="info-value" id="server-postal">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Timezone</div>
+              <div class="info-value" id="server-timezone">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Coordinates</div>
+              <div class="info-value" id="server-coordinates">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">ISP</div>
+              <div class="info-value" id="server-isp">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Organization</div>
+              <div class="info-value" id="server-org">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">ASN</div>
+              <div class="info-value" id="server-asn">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Hostname</div>
+              <div class="info-value" id="server-hostname">-</div>
             </div>
           </div>
         </div>
-      </template>
+      </div>
     </main>
 
-    <footer class="metadata">
+    <!-- DNS Info Tab -->
+    <main class="tab-content" id="dns-tab">
+      <div class="server-info-container">
+        <div class="server-info-section">
+          <h2>DNS Information</h2>
+          <div id="dns-status" class="metadata">Loading DNS information...</div>
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Domain</div>
+              <div class="info-value" id="dns-domain">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">IP Address (A Record)</div>
+              <div class="info-value" id="dns-a-record">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">IPv6 Address (AAAA Record)</div>
+              <div class="info-value" id="dns-aaaa-record">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">CNAME</div>
+              <div class="info-value" id="dns-cname">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">MX Records</div>
+              <div class="info-value" id="dns-mx">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">NS (Name Servers)</div>
+              <div class="info-value" id="dns-ns">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">TXT Records</div>
+              <div class="info-value" id="dns-txt">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">SOA (Start of Authority)</div>
+              <div class="info-value" id="dns-soa">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
 
+    <footer class="metadata global-footer">
       <div id="device-page-wrapper">
         <span class="device-icon">
           <svg id="device-icon-desktop" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Desktop field data">
@@ -64,8 +199,10 @@
       <div id="footer-wrapper">
         <span id="timestamp"></span>
         <span id="mobile-warning">
-          Mobile performance may be significantly slower.
-          <a href="https://web.dev/load-fast-enough-for-pwa/" target="_blank" rel="noopener">Learn more</a>
+          If you find an error or any improvement:
+            <a href="mailto:me@jmfernandez.dev?subject=Web%20Vitals%20Extension%20-%20Bug%20Report" title="Report an issue">
+              me@jmfernandez.dev
+            </a>
         </span>
         <span id="settings-link">
           <a href="/src/options/options.html" target="_blank">
@@ -77,14 +214,13 @@
           </a>
         </span>
       </div>
-
     </footer>
+
 
     <dialog id="eol-notice" popover>
       <p>
         As of January 2025, support for the Vitals Web extension has been terminated by Google.<br>
-        <a href="https://jmfernandez.dev/web-vitals-extension/" target="_blank">Learn more</a><br>
-        This is a fork maintained by <a href="https://github.com/jmfernxndez" target="_blank">jmfernxndez</a>.<br>
+        This is a fork maintained by <a href="https://jmfernandez.dev" target="_blank">jmfernxndez</a>.<br>
         If you find a bug, <a href="https://github.com/jmfernxndez/web-vitals-extension/issues" target="_blank" rel="noopener noreferrer">report it</a><br>
         Thank you
       </p>

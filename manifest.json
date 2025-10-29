@@ -1,16 +1,16 @@
 {
   "name": "Web Vitals",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "manifest_version": 3,
-  "description": "Measure metrics for a healthy site",
-  "homepage_url": "https://jmfernandez.dev/web-vitals-extension/",
+  "description": "Measure metrics for a healthy site + Server Info",
+  "homepage_url": "https://jmfernandez.dev/",
   "icons": {
     "128": "icons/vitals128w.png",
     "256": "icons/vitals256w.png",
     "512": "icons/vitals512w.png"
   },
   "action": {
-    "default_icon": "icons/default256w.png",
+    "default_icon": "icons/vitals512w.png",
     "default_title": "Web Vitals",
     "default_popup": "src/browser_action/popup.html"
   },
@@ -39,6 +39,6 @@
     "type": "module"
   },
   "content_security_policy": {
-    "extension_pages": "default-src 'self'; connect-src https://chromeuxreport.googleapis.com;"
+    "extension_pages": "default-src 'self'; connect-src https://chromeuxreport.googleapis.com https://ipwhois.app https://dns.google;"
   }
 }
