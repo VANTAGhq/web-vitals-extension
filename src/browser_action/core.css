@@ -488,14 +488,6 @@
   color: var(--color-text);
 }
 
-.web-vitals-chrome-extension-popup #server-status {
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background-color: var(--color-light-grey);
-  border-radius: 4px;
-  text-align: center;
-}
-
 .web-vitals-chrome-extension-popup .info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -566,4 +558,137 @@
 .web-vitals-chrome-extension-popup #vitals-tab #mobile-warning {
   display: block;
   margin-bottom: 0.75rem;
+}
+
+/* SEO Tab Styles */
+.web-vitals-chrome-extension-popup .seo-score-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  gap: 1rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.web-vitals-chrome-extension-popup .seo-score-wrapper {
+  text-align: center;
+  flex: 1;
+  min-width: 100px;
+  max-width: 140px;
+}
+
+.web-vitals-chrome-extension-popup .seo-score-circle {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+}
+
+.web-vitals-chrome-extension-popup .seo-score-circle svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.web-vitals-chrome-extension-popup .seo-score-bg {
+  fill: none;
+  stroke: var(--color-light-grey);
+  stroke-width: 8;
+}
+
+.web-vitals-chrome-extension-popup .seo-score-fill {
+  fill: none;
+  stroke: var(--color-good);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease, stroke 0.3s ease;
+}
+
+.web-vitals-chrome-extension-popup .seo-score-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-good);
+  font-family: "Google Sans", Roboto, sans-serif;
+}
+
+.web-vitals-chrome-extension-popup .seo-score-label {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text);
+  font-family: "Google Sans", Roboto, sans-serif;
+  line-height: 1.2;
+}
+
+.web-vitals-chrome-extension-popup .seo-issues {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #fff3e0;
+  border-left: 4px solid var(--color-needs-improvement);
+  border-radius: 4px;
+}
+
+.web-vitals-chrome-extension-popup .seo-issues h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-needs-improvement-text);
+  font-family: "Google Sans", Roboto, sans-serif;
+}
+
+.web-vitals-chrome-extension-popup .seo-issues ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.web-vitals-chrome-extension-popup .seo-issues li {
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.web-vitals-chrome-extension-popup .seo-issues li:last-child {
+  margin-bottom: 0;
+}
+
+.web-vitals-chrome-extension-popup .server-info-section h3 {
+  margin: 2rem 0 0.5rem 0;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, sans-serif;
+  color: var(--color-text);
+  border-bottom: 2px solid var(--color-dark-grey);
+  padding-bottom: 0.5rem;
+}
+
+.web-vitals-chrome-extension-popup .info-item-full {
+  grid-column: 1 / -1;
+}
+
+.web-vitals-chrome-extension-popup .info-value-wrap {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.web-vitals-chrome-extension-popup .info-meta {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+/* DNS Tab Styles */
+.web-vitals-chrome-extension-popup #dns-status {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: var(--color-light-grey);
+  border-radius: 4px;
+  text-align: center;
 }

@@ -5,7 +5,7 @@
   </head>
   <body>
     <header>
-      <h1>Web Vitals Extension | <a href="http://jmfernandez.dev" target="_blank" rel="noopener noreferrer">jmfernxndez</a></h1>
+      <h1>Web Vitals Extension | <a href="http://jtax.dev" target="_blank" rel="noopener noreferrer">jtax</a></h1>
     </header>
 
     <!-- Tab Navigation -->
@@ -13,6 +13,7 @@
       <button class="tab-button active" data-tab="vitals">Web Vitals</button>
       <button class="tab-button" data-tab="server">Server Info</button>
       <button class="tab-button" data-tab="dns">DNS Info</button>
+      <button class="tab-button" data-tab="seo">SEO</button>
     </nav>
 
     <!-- Web Vitals Tab -->
@@ -62,7 +63,6 @@
       <div class="server-info-container">
         <div class="server-info-section">
           <h2>Server Information</h2>
-          <div id="server-status" class="metadata">Loading server information...</div>
           
           <div class="info-grid">
             <div class="info-item">
@@ -134,7 +134,6 @@
       <div class="server-info-container">
         <div class="server-info-section">
           <h2>DNS Information</h2>
-          <div id="dns-status" class="metadata">Loading DNS information...</div>
           
           <div class="info-grid">
             <div class="info-item">
@@ -181,6 +180,233 @@
       </div>
     </main>
 
+    <!-- SEO Tab -->
+    <main class="tab-content" id="seo-tab">
+      <div class="server-info-container">
+        <div class="server-info-section">
+          <h2>SEO Analysis</h2>
+          
+          <!-- SEO Score -->
+          <div class="seo-score-container">
+            <div class="seo-score-wrapper">
+              <div class="seo-score-circle">
+                <svg viewBox="0 0 100 100">
+                  <circle class="seo-score-bg" cx="50" cy="50" r="45"></circle>
+                  <circle class="seo-score-fill" cx="50" cy="50" r="45" id="domain-authority-circle"></circle>
+                </svg>
+                <div class="seo-score-text" id="domain-authority-text">-</div>
+              </div>
+              <div class="seo-score-label">Domain Authority</div>
+            </div>
+
+            <div class="seo-score-wrapper">
+              <div class="seo-score-circle">
+                <svg viewBox="0 0 100 100">
+                  <circle class="seo-score-bg" cx="50" cy="50" r="45"></circle>
+                  <circle class="seo-score-fill" cx="50" cy="50" r="45" id="domain-rating-circle"></circle>
+                </svg>
+                <div class="seo-score-text" id="domain-rating-text">-</div>
+              </div>
+              <div class="seo-score-label">Domain Rating</div>
+            </div>
+
+            <div class="seo-score-wrapper">
+              <div class="seo-score-circle">
+                <svg viewBox="0 0 100 100">
+                  <circle class="seo-score-bg" cx="50" cy="50" r="45"></circle>
+                  <circle class="seo-score-fill" cx="50" cy="50" r="45" id="seo-score-circle"></circle>
+                </svg>
+                <div class="seo-score-text" id="seo-score-text">-</div>
+              </div>
+              <div class="seo-score-label">SEO Score</div>
+            </div>
+          </div>
+
+          <!-- SEO Issues -->
+          <div class="seo-issues" id="seo-issues-container" style="display: none;">
+            <h3>Issues Found</h3>
+            <ul id="seo-issues-list"></ul>
+          </div>
+
+          <!-- Basic SEO Info -->
+          <h3>Basic Information</h3>
+          <div class="info-grid">
+            <div class="info-item info-item-full">
+              <div class="info-label">Title</div>
+              <div class="info-value info-value-wrap" id="seo-title">-</div>
+              <div class="info-meta" id="seo-title-length">-</div>
+            </div>
+            
+            <div class="info-item info-item-full">
+              <div class="info-label">Meta Description</div>
+              <div class="info-value info-value-wrap" id="seo-description">-</div>
+              <div class="info-meta" id="seo-description-length">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Keywords</div>
+              <div class="info-value info-value-wrap" id="seo-keywords">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Canonical URL</div>
+              <div class="info-value info-value-wrap" id="seo-canonical">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Robots</div>
+              <div class="info-value" id="seo-robots">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Language</div>
+              <div class="info-value" id="seo-language">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Viewport</div>
+              <div class="info-value info-value-wrap" id="seo-viewport">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Charset</div>
+              <div class="info-value" id="seo-charset">-</div>
+            </div>
+          </div>
+
+          <!-- Security & Trust -->
+          <h3>Security & Domain Metrics</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">HTTPS Enabled</div>
+              <div class="info-value" id="seo-https">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">HSTS (Security)</div>
+              <div class="info-value" id="seo-hsts">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Content Security Policy</div>
+              <div class="info-value" id="seo-csp">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">X-Frame-Options</div>
+              <div class="info-value" id="seo-xfo">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Estimated Backlinks</div>
+              <div class="info-value" id="seo-backlinks">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Estimated Domain Age</div>
+              <div class="info-value" id="seo-domain-age">-</div>
+            </div>
+          </div>
+
+          <!-- Content Analysis -->
+          <h3>Content Analysis</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">H1 Tags</div>
+              <div class="info-value" id="seo-h1-count">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">H2 Tags</div>
+              <div class="info-value" id="seo-h2-count">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Total Images</div>
+              <div class="info-value" id="seo-images-count">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Images Without Alt</div>
+              <div class="info-value" id="seo-images-no-alt">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Internal Links</div>
+              <div class="info-value" id="seo-links-internal">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">External Links</div>
+              <div class="info-value" id="seo-links-external">-</div>
+            </div>
+          </div>
+
+          <!-- Structured Data -->
+          <h3>Structured Data</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Schema.org Present</div>
+              <div class="info-value" id="seo-schema">-</div>
+            </div>
+            
+            <div class="info-item info-item-full">
+              <div class="info-label">Schema Types</div>
+              <div class="info-value info-value-wrap" id="seo-schema-types">-</div>
+            </div>
+          </div>
+
+          <!-- Open Graph -->
+          <h3>Open Graph (Facebook)</h3>
+          <div class="info-grid">
+            <div class="info-item info-item-full">
+              <div class="info-label">OG Title</div>
+              <div class="info-value info-value-wrap" id="seo-og-title">-</div>
+            </div>
+            
+            <div class="info-item info-item-full">
+              <div class="info-label">OG Description</div>
+              <div class="info-value info-value-wrap" id="seo-og-description">-</div>
+            </div>
+            
+            <div class="info-item info-item-full">
+              <div class="info-label">OG Image</div>
+              <div class="info-value info-value-wrap" id="seo-og-image">-</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">OG Type</div>
+              <div class="info-value" id="seo-og-type">-</div>
+            </div>
+          </div>
+
+          <!-- Twitter Card -->
+          <h3>Twitter Card</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Card Type</div>
+              <div class="info-value" id="seo-twitter-card">-</div>
+            </div>
+            
+            <div class="info-item info-item-full">
+              <div class="info-label">Twitter Title</div>
+              <div class="info-value info-value-wrap" id="seo-twitter-title">-</div>
+            </div>
+            
+            <div class="info-item info-item-full">
+              <div class="info-label">Twitter Description</div>
+              <div class="info-value info-value-wrap" id="seo-twitter-description">-</div>
+            </div>
+            
+            <div class="info-item info-item-full">
+              <div class="info-label">Twitter Image</div>
+              <div class="info-value info-value-wrap" id="seo-twitter-image">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
     <footer class="metadata global-footer">
       <div id="device-page-wrapper">
         <span class="device-icon">
@@ -200,8 +426,8 @@
         <span id="timestamp"></span>
         <span id="mobile-warning">
           If you find an error or any improvement:
-            <a href="mailto:me@jmfernandez.dev?subject=Web%20Vitals%20Extension%20-%20Bug%20Report" title="Report an issue">
-              me@jmfernandez.dev
+            <a href="mailto:jose@jtax.dev?subject=Web%20Vitals%20Extension%20-%20Bug%20Report" title="Report an issue">
+              jose@jtax.dev
             </a>
         </span>
         <span id="settings-link">
@@ -220,8 +446,8 @@
     <dialog id="eol-notice" popover>
       <p>
         As of January 2025, support for the Vitals Web extension has been terminated by Google.<br>
-        This is a fork maintained by <a href="https://jmfernandez.dev" target="_blank">jmfernxndez</a>.<br>
-        If you find a bug, <a href="https://github.com/jmfernxndez/web-vitals-extension/issues" target="_blank" rel="noopener noreferrer">report it</a><br>
+        This is a fork maintained by <a href="https://jtax.dev" target="_blank">jtax</a>.<br>
+        If you find a bug, <a href="https://github.com/jtaxhq/web-vitals-extension/issues" target="_blank" rel="noopener noreferrer">report it</a><br>
         Thank you
       </p>
 

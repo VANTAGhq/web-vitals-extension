@@ -1,9 +1,9 @@
 {
   "name": "Web Vitals",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "manifest_version": 3,
-  "description": "Measure metrics for a healthy site + Server Info",
-  "homepage_url": "https://jmfernandez.dev/",
+  "description": "Measure metrics for a healthy site + Server Info + SEO Analysis",
+  "homepage_url": "https://hq.jtax.dev/",
   "icons": {
     "128": "icons/vitals128w.png",
     "256": "icons/vitals256w.png",
@@ -39,6 +39,6 @@
     "type": "module"
   },
   "content_security_policy": {
-    "extension_pages": "default-src 'self'; connect-src https://chromeuxreport.googleapis.com https://ipwhois.app https://dns.google;"
+    "extension_pages": "default-src 'self'; connect-src https://chromeuxreport.googleapis.com https://ipwhois.app https://dns.google https://http-observatory.security.mozilla.org https://securityheaders.com;"
   }
 }

@@ -6,7 +6,7 @@
 
 <img src="media/cwv-extension-drilldown.png">
 
-## 🚀 Enhanced Fork by jmfernxndez
+## 🚀 Enhanced Fork by jtax
 
 This is an enhanced fork of the original Google Web Vitals Extension with powerful additional features for developers, sysadmins, and SEO professionals.
 
@@ -41,7 +41,7 @@ Complete DNS records analysis in one place:
 *Powered by Google DNS API*
 
 #### 📧 Support
-Found a bug or issue? Contact us directly at **me@jmfernandez.dev** via the footer contact icon.
+Found a bug or issue? Contact us directly at **jose@jtax.dev** via the footer contact icon.
 
 ### 🎯 Use Cases
 

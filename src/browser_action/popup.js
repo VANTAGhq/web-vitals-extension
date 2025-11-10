@@ -16,6 +16,7 @@ import { CrUX } from './crux.js';
 import { LCP, INP, CLS, FCP, TTFB } from './metric.js';
 import { ServerInfo } from './server-info.js';
 import { DNSInfo } from './dns-info.js';
+import { SEOInfo } from './seo-info.js';
 
 class Popup {
 
@@ -74,19 +75,19 @@ class Popup {
         if (targetTab === 'dns' && !this.dnsInfoLoaded) {
           this.loadDNSInfo();
         }
+
+        // Load SEO info if SEO tab is clicked
+        if (targetTab === 'seo' && !this.seoInfoLoaded) {
+          this.loadSEOInfo();
+        }
       });
     });
   }
 
   async loadServerInfo() {
     this.serverInfoLoaded = true;
-    const statusElement = document.getElementById('server-status');
     
     try {
-      statusElement.innerText = 'Loading server information...';
-      statusElement.style.backgroundColor = 'var(--color-light-grey)';
-      statusElement.style.color = 'var(--color-text-muted)';
-      
       const startTime = performance.now();
       const serverInfo = await ServerInfo.load(this.url);
       const loadTime = Math.round(performance.now() - startTime);
@@ -105,22 +106,9 @@ class Popup {
       document.getElementById('server-org').innerText = serverInfo.org;
       document.getElementById('server-asn').innerText = serverInfo.asn;
       
-      // Check if there's a note (for partial success scenarios)
-      if (serverInfo.note) {
-        statusElement.innerText = `⚠️ ${serverInfo.note}`;
-        statusElement.style.backgroundColor = 'var(--color-needs-improvement)';
-        statusElement.style.color = 'white';
-      } else {
-        statusElement.innerText = `✓ Server information loaded successfully (${loadTime}ms)`;
-        statusElement.style.backgroundColor = 'var(--color-good)';
-        statusElement.style.color = 'white';
-      }
     } catch (e) {
       let errorMessage = e.message || 'Unable to load server information';
-      
-      statusElement.innerText = `❌ ${errorMessage}`;
-      statusElement.style.backgroundColor = 'var(--color-poor)';
-      statusElement.style.color = 'white';
+      console.error('Server info error:', errorMessage);
       
       // Set all fields to error state
       const errorFields = ['server-ip', 'server-hostname', 'server-location', 'server-country', 
@@ -138,13 +126,8 @@ class Popup {
 
   async loadDNSInfo() {
     this.dnsInfoLoaded = true;
-    const statusElement = document.getElementById('dns-status');
     
     try {
-      statusElement.innerText = 'Loading DNS records...';
-      statusElement.style.backgroundColor = 'var(--color-needs-improvement)';
-      statusElement.style.color = 'white';
-      
       const startTime = performance.now();
       const dnsInfo = await DNSInfo.load(this.url);
       const loadTime = Math.round(performance.now() - startTime);
@@ -159,15 +142,9 @@ class Popup {
       document.getElementById('dns-txt').innerText = dnsInfo.txt;
       document.getElementById('dns-soa').innerText = dnsInfo.soa;
       
-      statusElement.innerText = `✓ DNS information loaded successfully (${loadTime}ms)`;
-      statusElement.style.backgroundColor = 'var(--color-good)';
-      statusElement.style.color = 'white';
     } catch (e) {
       let errorMessage = e.message || 'Unable to load DNS information';
-      
-      statusElement.innerText = `❌ ${errorMessage}`;
-      statusElement.style.backgroundColor = 'var(--color-poor)';
-      statusElement.style.color = 'white';
+      console.error('DNS info error:', errorMessage);
       
       // Set all fields to error state
       const errorFields = ['dns-domain', 'dns-a-record', 'dns-aaaa-record', 'dns-cname', 
@@ -179,6 +156,200 @@ class Popup {
           element.style.color = 'var(--color-poor-text)';
         }
       });
+    }
+  }
+
+  async loadSEOInfo() {
+    this.seoInfoLoaded = true;
+    
+    try {
+      const startTime = performance.now();
+      const seoInfo = await SEOInfo.load(this.url);
+      const loadTime = Math.round(performance.now() - startTime);
+      
+      // Extract numeric scores
+      const daMatch = seoInfo.domainAuthority.match(/(\d+)/);
+      const daScore = daMatch ? parseInt(daMatch[1]) : 0;
+      
+      const drMatch = seoInfo.domainRating.match(/(\d+)/);
+      const drScore = drMatch ? parseInt(drMatch[1]) : 0;
+      
+      // Update circles in order: DA, DR, SEO
+      this.updateCircleScore('domain-authority-circle', 'domain-authority-text', daScore, daScore >= 70 ? 'good' : daScore >= 40 ? 'needs-improvement' : 'poor');
+      this.updateCircleScore('domain-rating-circle', 'domain-rating-text', drScore, drScore >= 70 ? 'good' : drScore >= 40 ? 'needs-improvement' : 'poor');
+      this.updateSEOScore(seoInfo.seoScore);
+      
+      // Update SEO Issues
+      const issuesContainer = document.getElementById('seo-issues-container');
+      if (seoInfo.issues && seoInfo.issues.length > 0) {
+        const issuesList = document.getElementById('seo-issues-list');
+        issuesList.innerHTML = '';
+        seoInfo.issues.forEach(issue => {
+          const li = document.createElement('li');
+          li.textContent = issue;
+          issuesList.appendChild(li);
+        });
+        issuesContainer.style.display = 'block';
+      } else {
+        // Hide issues container if no issues found
+        issuesContainer.style.display = 'none';
+      }
+      
+      // Update Basic Information
+      document.getElementById('seo-title').innerText = seoInfo.title;
+      document.getElementById('seo-title-length').innerText = `${seoInfo.titleLength} characters`;
+      this.updateLengthIndicator('seo-title-length', seoInfo.titleLength, 30, 60);
+      
+      document.getElementById('seo-description').innerText = seoInfo.description;
+      document.getElementById('seo-description-length').innerText = `${seoInfo.descriptionLength} characters`;
+      this.updateLengthIndicator('seo-description-length', seoInfo.descriptionLength, 120, 160);
+      
+      document.getElementById('seo-keywords').innerText = seoInfo.keywords;
+      document.getElementById('seo-canonical').innerText = seoInfo.canonical;
+      document.getElementById('seo-robots').innerText = seoInfo.robots;
+      document.getElementById('seo-language').innerText = seoInfo.language;
+      document.getElementById('seo-viewport').innerText = seoInfo.viewport;
+      document.getElementById('seo-charset').innerText = seoInfo.charset;
+      
+      // Update Security & Trust
+      document.getElementById('seo-https').innerText = seoInfo.httpsEnabled;
+      this.updateSecurityIndicator('seo-https', seoInfo.httpsEnabled);
+      
+      document.getElementById('seo-hsts').innerText = seoInfo.hsts;
+      this.updateSecurityIndicator('seo-hsts', seoInfo.hsts);
+      
+      document.getElementById('seo-csp').innerText = seoInfo.contentSecurityPolicy;
+      this.updateSecurityIndicator('seo-csp', seoInfo.contentSecurityPolicy);
+      
+      document.getElementById('seo-xfo').innerText = seoInfo.xFrameOptions;
+      this.updateSecurityIndicator('seo-xfo', seoInfo.xFrameOptions);
+      
+      document.getElementById('seo-backlinks').innerText = seoInfo.backlinksEstimate || 'Unknown';
+      document.getElementById('seo-domain-age').innerText = seoInfo.domainAge || 'Unknown';
+      
+      // Update Content Analysis
+      document.getElementById('seo-h1-count').innerText = seoInfo.h1Count;
+      this.updateCountIndicator('seo-h1-count', seoInfo.h1Count, 1, 1);
+      
+      document.getElementById('seo-h2-count').innerText = seoInfo.h2Count;
+      document.getElementById('seo-images-count').innerText = seoInfo.imagesCount;
+      document.getElementById('seo-images-no-alt').innerText = seoInfo.imagesWithoutAlt;
+      
+      if (seoInfo.imagesWithoutAlt > 0) {
+        document.getElementById('seo-images-no-alt').style.color = 'var(--color-poor-text)';
+      }
+      
+      document.getElementById('seo-links-internal').innerText = seoInfo.linksInternal;
+      document.getElementById('seo-links-external').innerText = seoInfo.linksExternal;
+      
+      // Update Structured Data
+      document.getElementById('seo-schema').innerText = seoInfo.hasSchema;
+      document.getElementById('seo-schema-types').innerText = seoInfo.schemaTypes;
+      
+      // Update Open Graph
+      document.getElementById('seo-og-title').innerText = seoInfo.ogTitle;
+      document.getElementById('seo-og-description').innerText = seoInfo.ogDescription;
+      document.getElementById('seo-og-image').innerText = seoInfo.ogImage;
+      document.getElementById('seo-og-type').innerText = seoInfo.ogType;
+      
+      // Update Twitter Card
+      document.getElementById('seo-twitter-card').innerText = seoInfo.twitterCard;
+      document.getElementById('seo-twitter-title').innerText = seoInfo.twitterTitle;
+      document.getElementById('seo-twitter-description').innerText = seoInfo.twitterDescription;
+      document.getElementById('seo-twitter-image').innerText = seoInfo.twitterImage;
+      
+      console.log(`✓ SEO analysis completed in ${loadTime}ms - DA: ${daScore} | DR: ${drScore} | SEO: ${seoInfo.seoScore}`);
+    } catch (e) {
+      let errorMessage = e.message || 'Unable to analyze SEO';
+      console.error('SEO analysis error:', errorMessage);
+    }
+  }
+
+  updateSEOScore(score) {
+    const scoreText = document.getElementById('seo-score-text');
+    const scoreCircle = document.getElementById('seo-score-circle');
+    
+    scoreText.innerText = score;
+    
+    // Calculate circle progress (circumference = 2 * π * r = 2 * π * 45 ≈ 283)
+    const circumference = 2 * Math.PI * 45;
+    const progress = (score / 100) * circumference;
+    const dashoffset = circumference - progress;
+    
+    scoreCircle.style.strokeDasharray = circumference;
+    scoreCircle.style.strokeDashoffset = dashoffset;
+    
+    // Color based on score
+    if (score >= 80) {
+      scoreCircle.style.stroke = 'var(--color-good)';
+      scoreText.style.color = 'var(--color-good)';
+    } else if (score >= 50) {
+      scoreCircle.style.stroke = 'var(--color-needs-improvement)';
+      scoreText.style.color = 'var(--color-needs-improvement)';
+    } else {
+      scoreCircle.style.stroke = 'var(--color-poor)';
+      scoreText.style.color = 'var(--color-poor)';
+    }
+  }
+
+  updateCircleScore(circleId, textId, score, rating) {
+    const scoreText = document.getElementById(textId);
+    const scoreCircle = document.getElementById(circleId);
+    
+    scoreText.innerText = score;
+    
+    // Calculate circle progress
+    const circumference = 2 * Math.PI * 45;
+    const progress = (score / 100) * circumference;
+    const dashoffset = circumference - progress;
+    
+    scoreCircle.style.strokeDasharray = circumference;
+    scoreCircle.style.strokeDashoffset = dashoffset;
+    
+    // Color based on rating
+    const colorMap = {
+      'good': 'var(--color-good)',
+      'needs-improvement': 'var(--color-needs-improvement)',
+      'poor': 'var(--color-poor)'
+    };
+    
+    const color = colorMap[rating] || 'var(--color-text-muted)';
+    scoreCircle.style.stroke = color;
+    scoreText.style.color = color;
+  }
+
+  updateSecurityIndicator(elementId, value) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    if (value === 'Yes' || value === 'Enabled' || value === 'Configured') {
+      element.style.color = 'var(--color-good-text)';
+      element.style.fontWeight = '600';
+    } else if (value === 'No' || value.includes('Not')) {
+      element.style.color = 'var(--color-poor-text)';
+      element.style.fontWeight = '600';
+    } else {
+      element.style.color = 'var(--color-text-muted)';
+    }
+  }
+
+  updateLengthIndicator(elementId, length, min, max) {
+    const element = document.getElementById(elementId);
+    if (length === 0) {
+      element.style.color = 'var(--color-poor-text)';
+    } else if (length >= min && length <= max) {
+      element.style.color = 'var(--color-good-text)';
+    } else {
+      element.style.color = 'var(--color-needs-improvement-text)';
+    }
+  }
+
+  updateCountIndicator(elementId, count, min, max) {
+    const element = document.getElementById(elementId);
+    if (count >= min && count <= max) {
+      element.style.color = 'var(--color-good-text)';
+    } else {
+      element.style.color = 'var(--color-needs-improvement-text)';
     }
   }
 
