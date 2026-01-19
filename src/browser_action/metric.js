@@ -193,6 +193,10 @@ export class INP extends Metric {
       poor: INPThresholds[1]
     };
 
+    // Set default value to 0 if null/undefined
+    local = (local === null || local === undefined) ? 0 : local;
+    rating = rating || 'good';
+
     super({
       id: 'inp',
       name: 'Interaction to Next Paint',
@@ -204,8 +208,8 @@ export class INP extends Metric {
   }
 
   formatValue(value) {
-    if (value === null) {
-      return 'Waiting for input…';
+    if (value === null || value === undefined) {
+      return '0 ms';
     }
 
     return millisecondsFormatter.format(value);

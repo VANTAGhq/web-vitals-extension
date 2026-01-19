@@ -13,22 +13,24 @@
 
 import { loadLocalMetrics, getOptions, getURL } from './chrome.js';
 import { CrUX } from './crux.js';
-import { LCP, INP, CLS, FCP, TTFB } from './metric.js';
+import { LCP, CLS, FCP, TTFB } from './metric.js';
 import { ServerInfo } from './server-info.js';
 import { DNSInfo } from './dns-info.js';
 import { SEOInfo } from './seo-info.js';
+import { TechInfo } from './tech-info.js';
+import { A11yInfo } from './a11y-info.js';
 
 class Popup {
 
-  constructor({metrics, background, options, url, error}) {
+  constructor({ metrics, background, options, url, error }) {
     if (error) {
       this.setStatus('Web Vitals are unavailable for this page.\n' + error);
       return;
     }
 
-    const {timestamp, ..._metrics} = metrics;
+    const { timestamp, ..._metrics } = metrics;
     // Format as a short timestamp (HH:MM:SS).
-    const formattedTimestamp = new Date(timestamp).toLocaleTimeString('en-US', {hourCycle: 'h23'});
+    const formattedTimestamp = new Date(timestamp).toLocaleTimeString('en-US', { hourCycle: 'h23' });
 
     this.timestamp = formattedTimestamp;
     this._metrics = _metrics;
@@ -41,13 +43,31 @@ class Popup {
   }
 
   init() {
+    this.initTheme();
     this.initTabs();
     this.initStatus();
     this.initPage();
     this.initTimestamp();
     this.initMetrics();
     this.initFieldData();
-    this.showEOLNotice();
+  }
+
+  initTheme() {
+    const htmlElement = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+
+    // Load saved theme preference
+    chrome.storage.sync.get({ darkMode: false }, ({ darkMode }) => {
+      if (darkMode) {
+        htmlElement.classList.add('dark-mode');
+      }
+    });
+
+    // Toggle theme
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      chrome.storage.sync.set({ darkMode: isDarkMode });
+    });
   }
 
   initTabs() {
@@ -57,11 +77,11 @@ class Popup {
     tabButtons.forEach(button => {
       button.addEventListener('click', () => {
         const targetTab = button.getAttribute('data-tab');
-        
+
         // Remove active class from all buttons and contents
         tabButtons.forEach(btn => btn.classList.remove('active'));
         tabContents.forEach(content => content.classList.remove('active'));
-        
+
         // Add active class to clicked button and corresponding content
         button.classList.add('active');
         document.getElementById(`${targetTab}-tab`).classList.add('active');
@@ -80,18 +100,28 @@ class Popup {
         if (targetTab === 'seo' && !this.seoInfoLoaded) {
           this.loadSEOInfo();
         }
+
+        // Load Tech info if Tech tab is clicked
+        if (targetTab === 'tech' && !this.techInfoLoaded) {
+          this.loadTechInfo();
+        }
+
+        // Load A11y info if A11y tab is clicked
+        if (targetTab === 'a11y' && !this.a11yInfoLoaded) {
+          this.loadA11yInfo();
+        }
       });
     });
   }
 
   async loadServerInfo() {
     this.serverInfoLoaded = true;
-    
+
     try {
       const startTime = performance.now();
       const serverInfo = await ServerInfo.load(this.url);
       const loadTime = Math.round(performance.now() - startTime);
-      
+
       // Update all server info fields
       document.getElementById('server-ip').innerText = serverInfo.ip;
       document.getElementById('server-hostname').innerText = serverInfo.hostname;
@@ -105,15 +135,15 @@ class Popup {
       document.getElementById('server-isp').innerText = serverInfo.isp;
       document.getElementById('server-org').innerText = serverInfo.org;
       document.getElementById('server-asn').innerText = serverInfo.asn;
-      
+
     } catch (e) {
       let errorMessage = e.message || 'Unable to load server information';
       console.error('Server info error:', errorMessage);
-      
+
       // Set all fields to error state
-      const errorFields = ['server-ip', 'server-hostname', 'server-location', 'server-country', 
-                          'server-city', 'server-region', 'server-postal', 'server-timezone',
-                          'server-coordinates', 'server-isp', 'server-org', 'server-asn'];
+      const errorFields = ['server-ip', 'server-hostname', 'server-location', 'server-country',
+        'server-city', 'server-region', 'server-postal', 'server-timezone',
+        'server-coordinates', 'server-isp', 'server-org', 'server-asn'];
       errorFields.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
@@ -126,12 +156,12 @@ class Popup {
 
   async loadDNSInfo() {
     this.dnsInfoLoaded = true;
-    
+
     try {
       const startTime = performance.now();
       const dnsInfo = await DNSInfo.load(this.url);
       const loadTime = Math.round(performance.now() - startTime);
-      
+
       // Update DNS info fields
       document.getElementById('dns-domain').innerText = dnsInfo.domain;
       document.getElementById('dns-a-record').innerText = dnsInfo.aRecord;
@@ -141,14 +171,14 @@ class Popup {
       document.getElementById('dns-ns').innerText = dnsInfo.ns;
       document.getElementById('dns-txt').innerText = dnsInfo.txt;
       document.getElementById('dns-soa').innerText = dnsInfo.soa;
-      
+
     } catch (e) {
       let errorMessage = e.message || 'Unable to load DNS information';
       console.error('DNS info error:', errorMessage);
-      
+
       // Set all fields to error state
-      const errorFields = ['dns-domain', 'dns-a-record', 'dns-aaaa-record', 'dns-cname', 
-                          'dns-mx', 'dns-ns', 'dns-txt', 'dns-soa'];
+      const errorFields = ['dns-domain', 'dns-a-record', 'dns-aaaa-record', 'dns-cname',
+        'dns-mx', 'dns-ns', 'dns-txt', 'dns-soa'];
       errorFields.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
@@ -161,24 +191,24 @@ class Popup {
 
   async loadSEOInfo() {
     this.seoInfoLoaded = true;
-    
+
     try {
       const startTime = performance.now();
       const seoInfo = await SEOInfo.load(this.url);
       const loadTime = Math.round(performance.now() - startTime);
-      
+
       // Extract numeric scores
       const daMatch = seoInfo.domainAuthority.match(/(\d+)/);
       const daScore = daMatch ? parseInt(daMatch[1]) : 0;
-      
+
       const drMatch = seoInfo.domainRating.match(/(\d+)/);
       const drScore = drMatch ? parseInt(drMatch[1]) : 0;
-      
+
       // Update circles in order: DA, DR, SEO
       this.updateCircleScore('domain-authority-circle', 'domain-authority-text', daScore, daScore >= 70 ? 'good' : daScore >= 40 ? 'needs-improvement' : 'poor');
       this.updateCircleScore('domain-rating-circle', 'domain-rating-text', drScore, drScore >= 70 ? 'good' : drScore >= 40 ? 'needs-improvement' : 'poor');
       this.updateSEOScore(seoInfo.seoScore);
-      
+
       // Update SEO Issues
       const issuesContainer = document.getElementById('seo-issues-container');
       if (seoInfo.issues && seoInfo.issues.length > 0) {
@@ -194,70 +224,68 @@ class Popup {
         // Hide issues container if no issues found
         issuesContainer.style.display = 'none';
       }
-      
+
       // Update Basic Information
       document.getElementById('seo-title').innerText = seoInfo.title;
       document.getElementById('seo-title-length').innerText = `${seoInfo.titleLength} characters`;
       this.updateLengthIndicator('seo-title-length', seoInfo.titleLength, 30, 60);
-      
+
       document.getElementById('seo-description').innerText = seoInfo.description;
       document.getElementById('seo-description-length').innerText = `${seoInfo.descriptionLength} characters`;
       this.updateLengthIndicator('seo-description-length', seoInfo.descriptionLength, 120, 160);
-      
+
       document.getElementById('seo-keywords').innerText = seoInfo.keywords;
       document.getElementById('seo-canonical').innerText = seoInfo.canonical;
       document.getElementById('seo-robots').innerText = seoInfo.robots;
       document.getElementById('seo-language').innerText = seoInfo.language;
       document.getElementById('seo-viewport').innerText = seoInfo.viewport;
       document.getElementById('seo-charset').innerText = seoInfo.charset;
-      
-      // Update Security & Trust
-      document.getElementById('seo-https').innerText = seoInfo.httpsEnabled;
-      this.updateSecurityIndicator('seo-https', seoInfo.httpsEnabled);
-      
-      document.getElementById('seo-hsts').innerText = seoInfo.hsts;
-      this.updateSecurityIndicator('seo-hsts', seoInfo.hsts);
-      
-      document.getElementById('seo-csp').innerText = seoInfo.contentSecurityPolicy;
-      this.updateSecurityIndicator('seo-csp', seoInfo.contentSecurityPolicy);
-      
-      document.getElementById('seo-xfo').innerText = seoInfo.xFrameOptions;
-      this.updateSecurityIndicator('seo-xfo', seoInfo.xFrameOptions);
-      
-      document.getElementById('seo-backlinks').innerText = seoInfo.backlinksEstimate || 'Unknown';
-      document.getElementById('seo-domain-age').innerText = seoInfo.domainAge || 'Unknown';
-      
+
       // Update Content Analysis
+      document.getElementById('seo-word-count').innerText = seoInfo.wordCount;
+      this.updateCountIndicator('seo-word-count', seoInfo.wordCount, 300, 10000); // Good if > 300
+
       document.getElementById('seo-h1-count').innerText = seoInfo.h1Count;
       this.updateCountIndicator('seo-h1-count', seoInfo.h1Count, 1, 1);
-      
+
       document.getElementById('seo-h2-count').innerText = seoInfo.h2Count;
       document.getElementById('seo-images-count').innerText = seoInfo.imagesCount;
       document.getElementById('seo-images-no-alt').innerText = seoInfo.imagesWithoutAlt;
-      
+
       if (seoInfo.imagesWithoutAlt > 0) {
         document.getElementById('seo-images-no-alt').style.color = 'var(--color-poor-text)';
       }
-      
+
       document.getElementById('seo-links-internal').innerText = seoInfo.linksInternal;
       document.getElementById('seo-links-external').innerText = seoInfo.linksExternal;
-      
+
+      document.getElementById('seo-favicon').innerText = seoInfo.hasFavicon ? 'Present' : 'Missing';
+      this.updateSecurityIndicator('seo-favicon', seoInfo.hasFavicon ? 'Yes' : 'No');
+
+      const deprecatedCount = seoInfo.deprecatedTags ? seoInfo.deprecatedTags.length : 0;
+      document.getElementById('seo-deprecated-tags').innerText = deprecatedCount === 0 ? 'None' : `${deprecatedCount} found`;
+      if (deprecatedCount > 0) {
+        document.getElementById('seo-deprecated-tags').style.color = 'var(--color-poor-text)';
+      } else {
+        document.getElementById('seo-deprecated-tags').style.color = 'var(--color-good-text)';
+      }
+
       // Update Structured Data
       document.getElementById('seo-schema').innerText = seoInfo.hasSchema;
       document.getElementById('seo-schema-types').innerText = seoInfo.schemaTypes;
-      
+
       // Update Open Graph
       document.getElementById('seo-og-title').innerText = seoInfo.ogTitle;
       document.getElementById('seo-og-description').innerText = seoInfo.ogDescription;
       document.getElementById('seo-og-image').innerText = seoInfo.ogImage;
       document.getElementById('seo-og-type').innerText = seoInfo.ogType;
-      
+
       // Update Twitter Card
       document.getElementById('seo-twitter-card').innerText = seoInfo.twitterCard;
       document.getElementById('seo-twitter-title').innerText = seoInfo.twitterTitle;
       document.getElementById('seo-twitter-description').innerText = seoInfo.twitterDescription;
       document.getElementById('seo-twitter-image').innerText = seoInfo.twitterImage;
-      
+
       console.log(`✓ SEO analysis completed in ${loadTime}ms - DA: ${daScore} | DR: ${drScore} | SEO: ${seoInfo.seoScore}`);
     } catch (e) {
       let errorMessage = e.message || 'Unable to analyze SEO';
@@ -265,20 +293,136 @@ class Popup {
     }
   }
 
+  async loadTechInfo() {
+    this.techInfoLoaded = true;
+
+    try {
+      const startTime = performance.now();
+      const techInfo = await TechInfo.load(this.url);
+      const loadTime = Math.round(performance.now() - startTime);
+
+      // Helper to format list or show "-"
+      const formatList = (list) => {
+        if (!list || list.length === 0) return '-';
+        return list.join(', ');
+      };
+
+      // CMS
+      document.getElementById('tech-cms').innerText = formatList(techInfo.cms);
+
+      // Server & Backend
+      document.getElementById('tech-server').innerText = techInfo.server || 'Unknown';
+
+      let langText = '';
+      if (techInfo.language && techInfo.language !== 'Unknown') {
+        langText = techInfo.language;
+      }
+      if (techInfo.databases && techInfo.databases.length > 0) {
+        langText += (langText ? ' | ' : '') + techInfo.databases.join(', ');
+      }
+      document.getElementById('tech-language').innerText = langText;
+
+      // Frameworks
+      document.getElementById('tech-frameworks').innerText = formatList(techInfo.frameworks);
+
+      // Analytics
+      document.getElementById('tech-analytics').innerText = formatList(techInfo.analytics);
+
+      // Fonts
+      document.getElementById('tech-fonts').innerText = formatList(techInfo.fonts);
+
+      console.log(`✓ Tech analysis completed in ${loadTime}ms`);
+    } catch (e) {
+      let errorMessage = e.message || 'Unable to analyze Tech Stack';
+      console.error('Tech analysis error:', errorMessage);
+
+      // Show error in fields
+      ['tech-cms', 'tech-server', 'tech-frameworks', 'tech-analytics', 'tech-fonts'].forEach(id => {
+        document.getElementById(id).innerText = 'Error loading data';
+        document.getElementById(id).style.color = 'var(--color-poor-text)';
+      });
+    }
+  }
+
+  async loadA11yInfo() {
+    this.a11yInfoLoaded = true;
+
+    try {
+      const startTime = performance.now();
+      const a11yInfo = await A11yInfo.load();
+      const loadTime = Math.round(performance.now() - startTime);
+
+      // Update Score
+      this.updateCircleScore('a11y-score-circle', 'a11y-score-text', a11yInfo.score,
+        a11yInfo.score >= 90 ? 'good' : a11yInfo.score >= 70 ? 'needs-improvement' : 'poor'
+      );
+
+      // Update Level
+      const levelEl = document.getElementById('a11y-level');
+      levelEl.innerText = a11yInfo.complianceLevel;
+      if (a11yInfo.score >= 90) levelEl.style.color = 'var(--color-good-text)';
+      else if (a11yInfo.score >= 70) levelEl.style.color = 'var(--color-needs-improvement-text)';
+      else levelEl.style.color = 'var(--color-poor-text)';
+
+      // Update Issues
+      const issuesContainer = document.getElementById('a11y-issues-container');
+      const issuesList = document.getElementById('a11y-issues-list');
+      issuesList.innerHTML = '';
+
+      if (a11yInfo.issues.length > 0) {
+        a11yInfo.issues.forEach(issue => {
+          const li = document.createElement('li');
+          li.textContent = `[${issue.category}] ${issue.text}`;
+          issuesList.appendChild(li);
+        });
+        issuesContainer.style.display = 'block';
+      } else {
+        issuesContainer.style.display = 'none';
+      }
+
+      // Update Good Practices
+      const goodContainer = document.getElementById('a11y-good-container');
+      const goodList = document.getElementById('a11y-good-list');
+      goodList.innerHTML = '';
+
+      if (a11yInfo.goodPractices.length > 0) {
+        a11yInfo.goodPractices.forEach(practice => {
+          const li = document.createElement('li');
+          li.textContent = practice;
+          goodList.appendChild(li);
+        });
+        goodContainer.style.display = 'block';
+      } else {
+        goodContainer.style.display = 'none';
+      }
+
+      // Update Stats
+      document.getElementById('a11y-stats-images').innerText = a11yInfo.stats.images;
+      document.getElementById('a11y-stats-links').innerText = a11yInfo.stats.links;
+      document.getElementById('a11y-stats-buttons').innerText = a11yInfo.stats.buttons;
+      document.getElementById('a11y-stats-inputs').innerText = a11yInfo.stats.inputs;
+
+      console.log(`✓ A11y analysis completed in ${loadTime}ms - Score: ${a11yInfo.score}`);
+    } catch (e) {
+      let errorMessage = e.message || 'Unable to analyze Accessibility';
+      console.error('A11y analysis error:', errorMessage);
+    }
+  }
+
   updateSEOScore(score) {
     const scoreText = document.getElementById('seo-score-text');
     const scoreCircle = document.getElementById('seo-score-circle');
-    
+
     scoreText.innerText = score;
-    
+
     // Calculate circle progress (circumference = 2 * π * r = 2 * π * 45 ≈ 283)
     const circumference = 2 * Math.PI * 45;
     const progress = (score / 100) * circumference;
     const dashoffset = circumference - progress;
-    
+
     scoreCircle.style.strokeDasharray = circumference;
     scoreCircle.style.strokeDashoffset = dashoffset;
-    
+
     // Color based on score
     if (score >= 80) {
       scoreCircle.style.stroke = 'var(--color-good)';
@@ -295,24 +439,24 @@ class Popup {
   updateCircleScore(circleId, textId, score, rating) {
     const scoreText = document.getElementById(textId);
     const scoreCircle = document.getElementById(circleId);
-    
+
     scoreText.innerText = score;
-    
+
     // Calculate circle progress
     const circumference = 2 * Math.PI * 45;
     const progress = (score / 100) * circumference;
     const dashoffset = circumference - progress;
-    
+
     scoreCircle.style.strokeDasharray = circumference;
     scoreCircle.style.strokeDashoffset = dashoffset;
-    
+
     // Color based on rating
     const colorMap = {
       'good': 'var(--color-good)',
       'needs-improvement': 'var(--color-needs-improvement)',
       'poor': 'var(--color-poor)'
     };
-    
+
     const color = colorMap[rating] || 'var(--color-text-muted)';
     scoreCircle.style.stroke = color;
     scoreText.style.color = color;
@@ -321,7 +465,7 @@ class Popup {
   updateSecurityIndicator(elementId, value) {
     const element = document.getElementById(elementId);
     if (!element) return;
-    
+
     if (value === 'Yes' || value === 'Enabled' || value === 'Configured') {
       element.style.color = 'var(--color-good-text)';
       element.style.fontWeight = '600';
@@ -377,11 +521,6 @@ class Popup {
       rating: this._metrics.cls.rating,
       background: this.background
     });
-    this.metrics.inp = new INP({
-      local: this._metrics.inp.value,
-      rating: this._metrics.inp.rating,
-      background: this.background
-    });
     this.metrics.fcp = new FCP({
       local: this._metrics.fcp.value,
       rating: this._metrics.fcp.rating,
@@ -402,20 +541,6 @@ class Popup {
       this.renderFieldData(fieldData, formFactor);
     }).catch(() => {
       this.setStatus('Local metrics only (field data unavailable)');
-    });
-  }
-
-  showEOLNotice() {
-    chrome.storage.sync.get({hideEOLNotice: false}, ({hideEOLNotice}) => {
-      if (hideEOLNotice) {
-        return;
-      }
-      const notice = document.getElementById('eol-notice');
-      notice.showPopover();
-      const hideNoticeToggle = document.getElementById('hide-eol-notice');
-      hideNoticeToggle.addEventListener('change', (e) => {
-        chrome.storage.sync.set({hideEOLNotice: e.target.checked});
-      });
     });
   }
 
@@ -440,7 +565,7 @@ class Popup {
     deviceElement.classList.add(`device-${formFactor.toLowerCase()}`);
   }
 
-  setHovercardText(metric, fieldData, formFactor='') {
+  setHovercardText(metric, fieldData, formFactor = '') {
     const hovercard = document.querySelector(`#${metric.id} .hovercard`);
     const abbr = metric.abbr;
     const local = metric.formatValue(metric.local);
@@ -521,7 +646,7 @@ class Popup {
       }
     }
 
-    const metrics = CrUX.getMetrics(fieldData).forEach(({id, data}) => {
+    const metrics = CrUX.getMetrics(fieldData).forEach(({ id, data }) => {
       const metric = this.metrics[id];
       if (!metric) {
         // The API may return additional metrics that we don't support.
@@ -557,5 +682,5 @@ class Popup {
 }
 
 Promise.all([loadLocalMetrics(), getOptions(), getURL()]).then(([localMetrics, options, url]) => {
-  window.popup = new Popup({...localMetrics, options, url});
+  window.popup = new Popup({ ...localMetrics, options, url });
 });

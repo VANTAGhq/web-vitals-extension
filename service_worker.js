@@ -364,3 +364,34 @@ self.addEventListener('activate', _ => {
   clearOldCache();
 });
 
+// Store response headers for tech detection
+const responseHeadersCache = new Map();
+
+chrome.webRequest.onCompleted.addListener(
+  (details) => {
+    if (details.type === 'main_frame' && details.responseHeaders) {
+      const headers = {};
+      details.responseHeaders.forEach(header => {
+        headers[header.name.toLowerCase()] = header.value;
+      });
+      responseHeadersCache.set(details.url, headers);
+
+      // Clean up old entries after 5 minutes
+      setTimeout(() => {
+        responseHeadersCache.delete(details.url);
+      }, 5 * 60 * 1000);
+    }
+  },
+  { urls: ['<all_urls>'] },
+  ['responseHeaders']
+);
+
+// Handle requests for response headers from popup
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'GET_RESPONSE_HEADERS') {
+    const headers = responseHeadersCache.get(request.url) || {};
+    sendResponse({ headers });
+  }
+  return true; // Keep the message channel open for async response
+});
+

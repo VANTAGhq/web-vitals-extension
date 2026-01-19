@@ -140,6 +140,11 @@
     localStorage.setItem('web-vitals-extension-metrics', JSON.stringify(metrics));
 
     // Check for preferences set in options
+    // Verify chrome.storage is available (Manifest V3 compatibility)
+    if (!chrome?.storage?.sync) {
+      return;
+    }
+
     chrome.storage.sync.get({
       enableOverlay: false,
       debug: false,
@@ -235,9 +240,12 @@
     // Only set the tabLoadedInBackground if not already set
     if (tabLoadedInBackground === undefined) {
       const key = response.tabId.toString();
-      chrome.storage.local.get(key, result => {
-        tabLoadedInBackground = result[key];
-      });
+      // Verify chrome.storage is available (Manifest V3 compatibility)
+      if (chrome?.storage?.local) {
+        chrome.storage.local.get(key, result => {
+          tabLoadedInBackground = result[key];
+        });
+      }
     }
   });
 

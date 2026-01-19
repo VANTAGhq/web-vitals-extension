@@ -3,12 +3,12 @@
   "version": "1.8.0",
   "description": "Instant Web Vitals metrics + Server Information",
   "main": "src/browser_action/vitals.js",
-  "repository": "https://github.com/jtaxhq/web-vitals-extension",
-  "homepage": "https://jtax.dev/web-vitals-extension/",
+  "repository": "https://github.com/VANTAGhq/web-vitals-extension",
+  "homepage": "https://vantag.es/",
   "bugs": {
-    "url": "https://github.com/jtaxhq/web-vitals-extension/issues"
+    "url": "https://github.com/VANTAGhq/web-vitals-extension/issues"
   },
-  "author": "jtax",
+  "author": "vantag.es",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {

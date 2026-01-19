@@ -546,6 +546,32 @@ function extractSEOData() {
     data.schemaTypes = '';
   }
 
+  // Word Count
+  const bodyText = document.body.innerText;
+  // Split by whitespace and filter empty strings
+  data.wordCount = bodyText.split(/\s+/).filter(w => w.length > 0).length;
+
+  // Text to HTML Ratio
+  const htmlLength = document.documentElement.outerHTML.length;
+  const textLength = bodyText.length;
+  data.textToHtmlRatio = htmlLength > 0 ? Math.round((textLength / htmlLength) * 100) : 0;
+
+  // Favicon
+  const favicon = document.querySelector('link[rel="icon"]') || document.querySelector('link[rel="shortcut icon"]');
+  data.hasFavicon = !!favicon;
+
+  // Deprecated Tags
+  data.deprecatedTags = [];
+  if (document.querySelector('meta[name="keywords"]')) {
+    data.deprecatedTags.push('<meta name="keywords">');
+  }
+  if (document.querySelector('center')) {
+    data.deprecatedTags.push('<center>');
+  }
+  if (document.querySelector('font')) {
+    data.deprecatedTags.push('<font>');
+  }
+
   return data;
 }
 
@@ -632,6 +658,23 @@ function calculateSEOScore(data, externalMetrics = {}) {
     score += 4;
   }
 
+  // Word Count (4 points)
+  if (data.wordCount > 300) {
+    score += 4;
+  } else if (data.wordCount > 100) {
+    score += 2;
+  }
+
+  // Favicon (2 points)
+  if (data.hasFavicon) {
+    score += 2;
+  }
+
+  // Deprecated Tags Penalty (-2 points per tag, max -6)
+  if (data.deprecatedTags && data.deprecatedTags.length > 0) {
+    score -= Math.min(data.deprecatedTags.length * 2, 6);
+  }
+
   // Security & HTTPS (12 points from external metrics)
   if (externalMetrics.httpsEnabled === 'Yes') {
     score += 6;
@@ -643,7 +686,8 @@ function calculateSEOScore(data, externalMetrics = {}) {
     score += 3;
   }
 
-  return Math.min(Math.round(score), maxScore);
+  // Ensure score is within 0-100
+  return Math.max(0, Math.min(Math.round(score), maxScore));
 }
 
 // Identify SEO issues
@@ -652,75 +696,90 @@ function identifySEOIssues(data, externalMetrics = {}) {
 
   // Title issues
   if (!data.title || data.title.length === 0) {
-    issues.push('❌ Missing title tag');
+    issues.push('Missing title tag');
   } else if (data.title.length < 30) {
-    issues.push('⚠️ Title too short (< 30 characters)');
+    issues.push('Title too short (< 30 characters)');
   } else if (data.title.length > 60) {
-    issues.push('⚠️ Title too long (> 60 characters)');
+    issues.push('Title too long (> 60 characters)');
   }
 
   // Description issues
   if (!data.description || data.description.length === 0) {
-    issues.push('❌ Missing meta description');
+    issues.push('Missing meta description');
   } else if (data.description.length < 120) {
-    issues.push('⚠️ Description too short (< 120 characters)');
+    issues.push('Description too short (< 120 characters)');
   } else if (data.description.length > 160) {
-    issues.push('⚠️ Description too long (> 160 characters)');
+    issues.push('Description too long (> 160 characters)');
   }
 
   // H1 issues
   if (data.h1Count === 0) {
-    issues.push('❌ No H1 tag found');
+    issues.push('No H1 tag found');
   } else if (data.h1Count > 1) {
-    issues.push(`⚠️ Multiple H1 tags (${data.h1Count})`);
+    issues.push(`Multiple H1 tags (${data.h1Count})`);
   }
 
   // Images without alt
   if (data.imagesWithoutAlt > 0) {
-    issues.push(`⚠️ ${data.imagesWithoutAlt} images without alt text`);
+    issues.push(`${data.imagesWithoutAlt} images without alt text`);
   }
 
   // Missing canonical
   if (!data.canonical) {
-    issues.push('⚠️ Missing canonical URL');
+    issues.push('Missing canonical URL');
   }
 
   // Missing viewport
   if (!data.viewport) {
-    issues.push('❌ Missing viewport meta tag (not mobile-friendly)');
+    issues.push('Missing viewport meta tag (not mobile-friendly)');
   }
 
   // Missing language
   if (!data.language) {
-    issues.push('⚠️ Missing language attribute');
+    issues.push('Missing language attribute');
   }
 
   // Missing Open Graph
   if (!data.ogTitle && !data.ogDescription) {
-    issues.push('⚠️ Missing Open Graph tags (poor social sharing)');
+    issues.push('Missing Open Graph tags (poor social sharing)');
   }
 
   // Missing structured data
   if (!data.hasSchema) {
-    issues.push('⚠️ No structured data found (limits rich snippets)');
+    issues.push('No structured data found (limits rich snippets)');
   }
 
   // Robots issues
   if (data.robots && data.robots.includes('noindex')) {
-    issues.push('❌ Page is blocked from indexing (noindex)');
+    issues.push('Page is blocked from indexing (noindex)');
+  }
+
+  // Word Count Issues
+  if (data.wordCount < 300) {
+    issues.push(`Low word count (${data.wordCount} words). Aim for 300+.`);
+  }
+
+  // Favicon Issue
+  if (!data.hasFavicon) {
+    issues.push('Missing favicon');
+  }
+
+  // Deprecated Tags Issues
+  if (data.deprecatedTags && data.deprecatedTags.length > 0) {
+    issues.push(`Deprecated tags found: ${data.deprecatedTags.join(', ')}`);
   }
 
   // Security issues from external metrics
   if (externalMetrics.httpsEnabled === 'No') {
-    issues.push('❌ HTTPS not enabled (security risk & SEO penalty)');
+    issues.push('HTTPS not enabled (security risk & SEO penalty)');
   }
 
   if (externalMetrics.hsts === 'Not configured') {
-    issues.push('⚠️ HSTS not configured (security improvement needed)');
+    issues.push('HSTS not configured (security improvement needed)');
   }
 
   if (externalMetrics.contentSecurityPolicy === 'Not configured') {
-    issues.push('⚠️ Content Security Policy not configured');
+    issues.push('Content Security Policy not configured');
   }
 
   return issues;

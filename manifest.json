@@ -1,9 +1,9 @@
 {
   "name": "Web Vitals",
-  "version": "1.8.0",
-  "manifest_version": 3,
-  "description": "Measure metrics for a healthy site + Server Info + SEO Analysis",
-  "homepage_url": "https://hq.jtax.dev/",
+  "version": "2.0.0",
+  "manifest_version": 4,
+  "description": "Measure metrics for a healthy site, Server Info, Web info, SEO Analysis & Accessibility checks.",
+  "homepage_url": "https://vantag.es/",
   "icons": {
     "128": "icons/vitals128w.png",
     "256": "icons/vitals256w.png",
@@ -16,7 +16,7 @@
   },
   "options_page": "src/options/options.html",
   "host_permissions": ["*://*/*"],
-  "permissions": ["tabs", "storage", "activeTab", "scripting"],
+  "permissions": ["tabs", "storage", "activeTab", "scripting", "webRequest"],
   "web_accessible_resources": [
     {
       "resources": [
