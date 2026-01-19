@@ -1,7 +1,7 @@
 {
   "name": "Web Vitals",
   "version": "2.0.0",
-  "manifest_version": 4,
+  "manifest_version": 3,
   "description": "Measure metrics for a healthy site, Server Info, Web info, SEO Analysis & Accessibility checks.",
   "homepage_url": "https://vantag.es/",
   "icons": {
