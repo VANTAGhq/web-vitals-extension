@@ -1,14 +1,14 @@
 {
   "name": "web-vitals-extension",
-  "version": "2.5.0",
+  "version": "3.0.0",
   "description": "Instant Web Vitals metrics + Server Information",
   "main": "src/browser_action/vitals.js",
-  "repository": "https://github.com/VANTAGhq/web-vitals-extension",
-  "homepage": "https://vantag.es/",
+  "repository": "https://github.com/vantagdev/web-vitals-extension",
+  "homepage": "https://vantag.dev/",
   "bugs": {
-    "url": "https://github.com/VANTAGhq/web-vitals-extension/issues"
+    "url": "https://github.com/vantagdev/web-vitals-extension/issues"
   },
-  "author": "vantag.es",
+  "author": "vantag.dev",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
@@ -16,11 +16,11 @@
     "build": "npm install; cp node_modules/web-vitals/dist/web-vitals.attribution.js src/browser_action/web-vitals.js"
   },
   "devDependencies": {
-    "babel-eslint": "^10.1.0",
-    "eslint": "^6.8.0",
+    "@babel/eslint-parser": "^7.24.0",
+    "eslint": "^8.57.0",
     "eslint-config-google": "^0.14.0"
   },
   "dependencies": {
-    "web-vitals": "^4.2.3"
+    "web-vitals": "^4.2.4"
   }
 }

@@ -1,51 +1,291 @@
 <!DOCTYPE html>
-<html class="web-vitals-chrome-extension">
+<html lang="en">
 
 <head>
-    <title>Core Web Vitals Options</title>
-    <link rel="stylesheet" type="text/css" href="../browser_action/viewer.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Web Vitals — Options</title>
+    <style>
+        :root {
+            --color-text: #3C4043;
+            --color-text-muted: #5F6368;
+            --color-text-link: #3740FF;
+            --color-background: #F8F9FA;
+            --color-card: #FFFFFF;
+            --color-border: #E5E7EB;
+            --color-card-hover: #F9FAFB;
+            --color-accent: #3740FF;
+            --color-good: #1E8E3E;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html.dark-mode {
+            --color-text: #E5E7EB;
+            --color-text-muted: #9CA3AF;
+            --color-text-link: #60A5FA;
+            --color-background: #0F1420;
+            --color-card: #1F2937;
+            --color-border: #374151;
+            --color-card-hover: #374151;
+            --color-accent: #60A5FA;
+            --color-good: #4ADE80;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            html:not(.light-mode):not(.dark-mode) {
+                --color-text: #E5E7EB;
+                --color-text-muted: #9CA3AF;
+                --color-text-link: #60A5FA;
+                --color-background: #0F1420;
+                --color-card: #1F2937;
+                --color-border: #374151;
+                --color-card-hover: #374151;
+                --color-accent: #60A5FA;
+                --color-good: #4ADE80;
+            }
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Google Sans", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--color-text);
+            background: var(--color-background);
+            padding: 24px;
+            min-width: 360px;
+        }
+
+        .wrap { max-width: 520px; margin: 0 auto; }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        header img { width: 32px; height: 32px; }
+
+        header h1 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .theme-toggle {
+            margin-left: auto;
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.125rem;
+            line-height: 1;
+        }
+
+        .theme-toggle:hover {
+            background: var(--color-card-hover);
+            border-color: var(--color-accent);
+        }
+
+        .theme-toggle:focus-visible {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
+        }
+
+        .group {
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 4px 16px;
+            margin-bottom: 16px;
+        }
+
+        .group-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-muted);
+            margin: 16px 0 8px;
+        }
+
+        .option {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .option:last-child { border-bottom: none; }
+
+        .option input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            border: 2px solid var(--color-border);
+            border-radius: 6px;
+            background: var(--color-card);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .option input[type="checkbox"]:hover { border-color: var(--color-accent); }
+
+        .option input[type="checkbox"]:checked {
+            background: var(--color-accent);
+            border-color: var(--color-accent);
+        }
+
+        .option input[type="checkbox"]:checked::after {
+            content: "";
+            position: absolute;
+            left: 5px;
+            top: 1px;
+            width: 5px;
+            height: 10px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .option input[type="checkbox"]:focus-visible {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
+        }
+
+        .option label { cursor: pointer; flex: 1; }
+
+        .option .label-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: block;
+        }
+
+        .option .label-desc {
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        #save {
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #fff;
+            background: var(--color-accent);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        #save:hover { filter: brightness(1.08); }
+        #save:active { transform: translateY(1px); }
+        #save:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+        #status {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-good);
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        #status.visible { opacity: 1; }
+
+        a { color: var(--color-text-link); }
+    </style>
 </head>
 
-<body class="lh-root lh-vars">
+<body>
+    <div class="wrap">
+        <header>
+            <img src="../../icons/vitals128w.png" alt="Web Vitals">
+            <h1>Web Vitals — Options</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </header>
 
-    <div class="lh-score__gauge" role="heading" aria-level="2">
-        <div class="lh-gauge__label">Options</div>
-        <div class="lh-audit__header lh-expandable-details__summary">
-            <span class="lh-audit__score-icon"></span>
-            <span class="lh-audit__title-and-text">
+        <div class="group">
+            <div class="group-title">Display</div>
+
+            <div class="option">
+                <input type="checkbox" id="overlay">
                 <label for="overlay">
-                    <input type="checkbox" id="overlay">
-                    Display HUD overlay
+                    <span class="label-title">Display HUD overlay</span>
+                    <span class="label-desc">Show a heads-up display with live metrics on the page.</span>
                 </label>
-                <br/>
-                <label for="consoleLogging">
-                    <input type="checkbox" id="consoleLogging">
-                    Console logging
-                </label>
-                <br/>
-                <label for="userTiming">
-                    <input type="checkbox" id="userTiming">
-                    User Timings (for DevTools Performance Panel recordings).
-                </label>
-                <br/>
-                <label for="preferPhoneField">
-                    <input type="checkbox" id="preferPhoneField">
-                    Compare local experiences to phone field data
-                </label>
-                <br/>
+            </div>
+
+            <div class="option">
+                <input type="checkbox" id="noBadgeAnimation">
                 <label for="noBadgeAnimation">
-                    <input type="checkbox" id="noBadgeAnimation">
-                    Only show overall status in badge (no animation of failing metrics)
+                    <span class="label-title">Simplify toolbar badge</span>
+                    <span class="label-desc">Only show overall status in the badge, without animating each failing metric.</span>
                 </label>
-                <br/>
-                <label for="hideEOLNotice">
-                    <input type="checkbox" id="hideEOLNotice">
-                    Never show extension deprecation notice
-                </label> (<a href="https://developer.chrome.com/blog/web-vitals-extension">Learn more</a>)
-                <div id="status"></div>
-                <button id="save">Save</button>
-                </div>
-            </span>
+            </div>
+        </div>
+
+        <div class="group">
+            <div class="group-title">Field data</div>
+
+            <div class="option">
+                <input type="checkbox" id="preferPhoneField">
+                <label for="preferPhoneField">
+                    <span class="label-title">Compare against phone field data</span>
+                    <span class="label-desc">Use mobile CrUX data instead of desktop when comparing your local experience.</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="group">
+            <div class="group-title">Developer</div>
+
+            <div class="option">
+                <input type="checkbox" id="consoleLogging">
+                <label for="consoleLogging">
+                    <span class="label-title">Console logging</span>
+                    <span class="label-desc">Log metric details to the browser console as they are measured.</span>
+                </label>
+            </div>
+
+            <div class="option">
+                <input type="checkbox" id="userTiming">
+                <label for="userTiming">
+                    <span class="label-title">User Timing marks</span>
+                    <span class="label-desc">Emit User Timing entries for the DevTools Performance panel recordings.</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div id="status"></div>
+            <button id="save">Save options</button>
         </div>
     </div>
 

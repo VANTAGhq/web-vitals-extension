@@ -294,13 +294,13 @@ function generateA11yFixSuggestions(issues, stats) {
     const missingLabelsIssue = issues.find(i => i.category === 'Forms');
     if (missingLabelsIssue) {
         const count = parseInt(missingLabelsIssue.text);
-        suggestions.push(`${count} form inputs are missing labels. Use an explicit \`<label for="id"\`\`, wrap the input in a \`<label\`\`, or add an aria-label / aria-labelledby attribute. Unlabeled inputs are impossible for screen reader users to understand.`);
+        suggestions.push(`${count} form inputs are missing labels. Use an explicit <label for="id">, wrap the input in a <label>, or add an aria-label / aria-labelledby attribute. Unlabeled inputs are impossible for screen reader users to understand.`);
     }
 
     // Headings structure
     const noHeadingsIssue = issues.find(i => i.text.includes('No headings'));
     if (noHeadingsIssue) {
-        suggestions.push('No headings were found. Add an \`<h1\`\` for the main page title and use \`<h2\`\`–\`<h6\`\` to create a logical outline. Headings are the primary navigation method for screen reader users.');
+        suggestions.push('No headings were found. Add an <h1> for the main page title and use <h2>–<h6> to create a logical outline. Headings are the primary navigation method for screen reader users.');
     }
 
     const skippedHeadingsIssue = issues.find(i => i.text.includes('skipped'));
@@ -310,19 +310,19 @@ function generateA11yFixSuggestions(issues, stats) {
 
     const noH1Issue = issues.find(i => i.text.includes('does not start with H1'));
     if (noH1Issue) {
-        suggestions.push('The page does not start with an \`<h1\`\`. Every page should have exactly one H1 that describes the main topic. This is critical for screen reader navigation and SEO.');
+        suggestions.push('The page does not start with an <h1>. Every page should have exactly one H1 that describes the main topic. This is critical for screen reader navigation and SEO.');
     }
 
     // Landmarks
     const mainLandmarkIssue = issues.find(i => i.text.includes('<main>'));
     if (mainLandmarkIssue) {
-        suggestions.push('No \`<main>\` landmark found. Wrap the primary content in a \`<main>\` element or add \`role="main"\`. Landmarks allow screen reader users to jump directly to the main content.');
+        suggestions.push('No <main> landmark found. Wrap the primary content in a <main> element or add role="main". Landmarks allow screen reader users to jump directly to the main content.');
     }
 
     // Focus
     const tabindexIssue = issues.find(i => i.text.includes('tabindex'));
     if (tabindexIssue) {
-        suggestions.push('Avoid positive tabindex values (\`tabindex="1"\`, etc.). They break the natural tab order and make keyboard navigation unpredictable. Use \`tabindex="0"\` for custom interactive elements or focus management with JavaScript.');
+        suggestions.push('Avoid positive tabindex values (tabindex="1", etc.). They break the natural tab order and make keyboard navigation unpredictable. Use tabindex="0" for custom interactive elements or focus management with JavaScript.');
     }
 
     // General suggestions if score is low

@@ -8,15 +8,15 @@
 <body>
   <header>
     <div class="brand">
-      <a href="https://vantag.es/" target="_blank" rel="noopener noreferrer" class="brand-link" title="Vantag">
-        <img src="/icons/vtg-black.webp" alt="Vantag" width="70" class="brand-logo brand-logo-light">
-        <img src="/icons/vtg-white.webp" alt="Vantag" width="70" class="brand-logo brand-logo-dark">
+      <a href="https://vantag.dev/" target="_blank" rel="noopener noreferrer" class="brand-link" title="Vantag">
+        <img src="/icons/vtg-black.webp" alt="VANTAG.dev" width="150" class="brand-logo brand-logo-light">
+        <img src="/icons/vtg-white.webp" alt="VANTAG.dev" width="150" class="brand-logo brand-logo-dark">
       </a>
       |
       <h1>Web Vitals</h1>
     </div>
-    <div class="settings">
-      <button id="theme-toggle" class="theme-toggle" title="Toggle dark mode">
+    <div class="settings" role="group" aria-label="Actions">
+      <button id="theme-toggle" class="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark/light theme">
       <svg class="sun-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M10 2.5V5M10 15V17.5M17.5 10H15M5 10H2.5M15.3033 4.69669L13.5355 6.46446M6.46446 13.5355L4.69669 15.3033M15.3033 15.3033L13.5355 13.5355M6.46446 6.46446L4.69669 4.69669M13 10C13 11.6569 11.6569 13 10 13C8.34315 13 7 11.6569 7 10C7 8.34315 8.34315 7 10 7C11.6569 7 13 8.34315 13 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
@@ -25,7 +25,7 @@
       </svg>
     </button>
 
-    <button id="sidePanel" class="sidePanel" title="Toggle side panel">
+    <button id="sidePanel" class="sidePanel" title="Toggle side panel" aria-label="Open side panel">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="2.5" y="3" width="15" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
         <line x1="8" y1="3" x2="8" y2="17" stroke="currentColor" stroke-width="1.5"/>
@@ -35,7 +35,7 @@
       </svg>
     </button>
 
-    <button id="export-report" class="export-button" title="Export report as Markdown">
+    <button id="export-report" class="export-button" title="Export report as Markdown" aria-label="Export report as Markdown">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M10 12.5V3.5M10 12.5L6.5 9M10 12.5L13.5 9M3.5 14.5V15.5C3.5 16.0523 3.94772 16.5 4.5 16.5H15.5C16.0523 16.5 16.5 16.0523 16.5 15.5V14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
@@ -44,17 +44,17 @@
   </header>
 
   <!-- Tab Navigation -->
-  <nav class="tab-navigation">
-    <button class="tab-button active" data-tab="vitals">Web Vitals</button>
-    <button class="tab-button" data-tab="server">Server Info</button>
-    <button class="tab-button" data-tab="dns">DNS Info</button>
-    <button class="tab-button" data-tab="seo">SEO</button>
-    <button class="tab-button" data-tab="tech">Tech Stack</button>
-    <button class="tab-button" data-tab="a11y">A11y</button>
+  <nav class="tab-navigation" role="tablist" aria-label="Analysis tabs">
+    <button class="tab-button active" data-tab="vitals" role="tab" aria-selected="true" aria-controls="vitals-tab" id="vitals-tab-btn">Web Vitals</button>
+    <button class="tab-button" data-tab="server" role="tab" aria-selected="false" aria-controls="server-tab" id="server-tab-btn">Server Info</button>
+    <button class="tab-button" data-tab="dns" role="tab" aria-selected="false" aria-controls="dns-tab" id="dns-tab-btn">DNS Info</button>
+    <button class="tab-button" data-tab="seo" role="tab" aria-selected="false" aria-controls="seo-tab" id="seo-tab-btn">SEO</button>
+    <button class="tab-button" data-tab="tech" role="tab" aria-selected="false" aria-controls="tech-tab" id="tech-tab-btn">Tech Stack</button>
+    <button class="tab-button" data-tab="a11y" role="tab" aria-selected="false" aria-controls="a11y-tab" id="a11y-tab-btn">A11y</button>
   </nav>
 
   <!-- Web Vitals Tab -->
-  <main class="tab-content active" id="vitals-tab">
+  <main class="tab-content active" id="vitals-tab" role="tabpanel" aria-labelledby="vitals-tab-btn">
     <div class="tab-header">
       <div id="metadata" class="metadata">
         <div id="status">Waiting for local data&hellip;</div>
@@ -102,7 +102,11 @@
   </main>
 
   <!-- Server Info Tab -->
-  <main class="tab-content" id="server-tab">
+  <main class="tab-content" id="server-tab" role="tabpanel" aria-labelledby="server-tab-btn">
+    <div class="tab-loading" id="server-loading" style="display: none;">
+      <div class="spinner"></div>
+      <span>Loading Server Info...</span>
+    </div>
     <div class="server-info-container">
       <div class="server-info-section">
         <h2>Server Information</h2>
@@ -158,7 +162,11 @@
   </main>
 
   <!-- DNS Info Tab -->
-  <main class="tab-content" id="dns-tab">
+  <main class="tab-content" id="dns-tab" role="tabpanel" aria-labelledby="dns-tab-btn">
+    <div class="tab-loading" id="dns-loading" style="display: none;">
+      <div class="spinner"></div>
+      <span>Loading DNS Info...</span>
+    </div>
     <div class="server-info-container">
       <div class="server-info-section">
         <h2>DNS Information</h2>
@@ -217,7 +225,11 @@
   </main>
 
   <!-- SEO Tab -->
-  <main class="tab-content" id="seo-tab">
+  <main class="tab-content" id="seo-tab" role="tabpanel" aria-labelledby="seo-tab-btn">
+    <div class="tab-loading" id="seo-loading" style="display: none;">
+      <div class="spinner"></div>
+      <span>Loading SEO Analysis...</span>
+    </div>
     <div class="server-info-container">
       <div class="server-info-section">
         <h2>SEO Analysis</h2>
@@ -286,11 +298,6 @@
           </div>
 
           <div class="info-item">
-            <div class="info-label">Keywords</div>
-            <div class="info-value info-value-wrap" id="seo-keywords">-</div>
-          </div>
-
-          <div class="info-item">
             <div class="info-label">Canonical URL</div>
             <div class="info-value info-value-wrap" id="seo-canonical">-</div>
           </div>
@@ -313,6 +320,70 @@
           <div class="info-item">
             <div class="info-label">Charset</div>
             <div class="info-value" id="seo-charset">-</div>
+          </div>
+        </div>
+
+        <!-- Indexability Audit (v3.0) -->
+        <h3>Indexability Audit</h3>
+        <div class="info-grid">
+          <div class="info-item info-item-full">
+            <div class="info-label">Status</div>
+            <div class="info-value" id="seo-indexability-status">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Meta Robots</div>
+            <div class="info-value" id="seo-meta-robots">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">X-Robots-Tag</div>
+            <div class="info-value" id="seo-x-robots-tag">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">robots.txt</div>
+            <div class="info-value" id="seo-robots-txt-status">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">HTTP Status</div>
+            <div class="info-value" id="seo-http-status">-</div>
+          </div>
+        </div>
+
+        <!-- Redirect Chain (v3.0) -->
+        <div id="seo-redirect-section" style="display: none; margin-top: 1.5rem;">
+          <h3>Redirect Chain</h3>
+          <div class="redirect-chain" id="seo-redirect-chain"></div>
+        </div>
+
+        <!-- hreflang (v3.0) -->
+        <div id="seo-hreflang-section" style="display: none; margin-top: 1.5rem;">
+          <h3>hreflang Tags</h3>
+          <div class="info-grid" id="seo-hreflang-grid"></div>
+          <div class="hreflang-warning" id="seo-hreflang-warning" style="display: none;">
+            ⚠️ Missing x-default for multi-language site
+          </div>
+        </div>
+
+        <!-- Heading Outline (v3.0) -->
+        <div id="seo-heading-section" style="display: none; margin-top: 1.5rem;">
+          <h3>Heading Outline</h3>
+          <div class="heading-outline" id="seo-heading-outline"></div>
+          <div class="heading-warning" id="seo-heading-warning" style="display: none;">
+            ⚠️ Skipped heading levels detected
+          </div>
+        </div>
+
+        <!-- Sitemap (v3.0) -->
+        <div id="seo-sitemap-section" style="display: none; margin-top: 1.5rem;">
+          <h3>Sitemap</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Type</div>
+              <div class="info-value" id="seo-sitemap-type">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">URL Count</div>
+              <div class="info-value" id="seo-sitemap-url-count">-</div>
+            </div>
           </div>
         </div>
 
@@ -431,7 +502,11 @@
   </main>
 
   <!-- Tech Stack Tab -->
-  <main class="tab-content" id="tech-tab">
+  <main class="tab-content" id="tech-tab" role="tabpanel" aria-labelledby="tech-tab-btn">
+    <div class="tab-loading" id="tech-loading" style="display: none;">
+      <div class="spinner"></div>
+      <span>Loading Tech Stack...</span>
+    </div>
     <div class="server-info-container">
       <div class="server-info-section">
         <h2>Technology Stack</h2>
@@ -468,7 +543,11 @@
   </main>
 
   <!-- Accessibility Tab -->
-  <main class="tab-content" id="a11y-tab">
+  <main class="tab-content" id="a11y-tab" role="tabpanel" aria-labelledby="a11y-tab-btn">
+    <div class="tab-loading" id="a11y-loading" style="display: none;">
+      <div class="spinner"></div>
+      <span>Loading Accessibility Audit...</span>
+    </div>
     <div class="server-info-container">
       <div class="server-info-section">
         <h2>Accessibility Audit</h2>
@@ -505,7 +584,7 @@
 
         <!-- Good Practices -->
         <div class="seo-issues" id="a11y-good-container"
-          style="display: none; background-color: #e6f4ea; border-left-color: var(--color-good);">
+          style="display: none; background-color: #135b2821; border-left-color: var(--color-good);">
           <h3 style="color: var(--color-good-text);">Good Practices</h3>
           <ul id="a11y-good-list"></ul>
         </div>
@@ -539,6 +618,17 @@
   <footer class="global-footer">
     <div class="footer-left">
       <span id="timestamp"></span>
+      <div class="footer-social">
+        <a href="https://vantag.dev/" target="_blank" rel="noopener noreferrer" class="social-icon" title="Vantag" aria-label="Vantag">
+          <img style="width: 15px;" src="/icons/web.svg" alt="VANTAG.dev">
+        </a>
+        <a href="https://x.com/VANTAGdev" target="_blank" rel="noopener noreferrer" class="social-icon" title="X (Twitter)" aria-label="X (Twitter)">
+          <img style="width: 15px;" src="/icons/x.svg" alt="X (Twitter)">
+        </a>
+        <a href="https://github.com/vantagdev" target="_blank" rel="noopener noreferrer" class="social-icon" title="GitHub" aria-label="GitHub">
+          <img style="width: 15px;" src="/icons/github.svg" alt="github">
+        </a>
+      </div>
     </div>
     <div class="footer-right">
       <a href="#" id="open-options">Options</a>

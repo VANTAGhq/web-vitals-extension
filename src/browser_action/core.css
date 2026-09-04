@@ -841,7 +841,7 @@
 .web-vitals-chrome-extension-popup #a11y-good-container {
   margin: 1.5rem 0;
   padding: 1.25rem;
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgb(15 72 32 / 19%);
   border: 1px solid var(--color-good);
   border-radius: var(--radius-md);
 }
@@ -960,8 +960,48 @@
 }
 
 .web-vitals-chrome-extension-popup .footer-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   font-family: monospace;
   font-size: 0.8rem;
+}
+
+.web-vitals-chrome-extension-popup .footer-social {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.web-vitals-chrome-extension-popup .social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transition: filter 200ms ease;
+}
+
+.web-vitals-chrome-extension-popup .social-icon svg,
+.web-vitals-chrome-extension-popup .social-icon img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0);
+}
+
+.web-vitals-chrome-extension-popup .social-icon:hover svg,
+.web-vitals-chrome-extension-popup .social-icon:hover img {
+  filter: brightness(0.5);
+}
+
+/* Dark mode: make icons light (works for PNG and SVG via filter) */
+html.dark-mode .web-vitals-chrome-extension-popup .social-icon svg,
+html.dark-mode .web-vitals-chrome-extension-popup .social-icon img {
+  filter: brightness(0) invert(1);
+}
+
+html.dark-mode .web-vitals-chrome-extension-popup .social-icon:hover svg {
+  filter: brightness(0.8) invert(1);
 }
 
 /* ========== Fix Suggestions ========== */
@@ -1130,4 +1170,188 @@
 
 .web-vitals-chrome-extension-popup.sidepanel-mode .footer-left {
   font-size: 0.7rem;
+}
+
+/* ========== Loading Spinner ========== */
+.web-vitals-chrome-extension-popup .tab-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  color: var(--color-text-muted);
+  gap: 1rem;
+}
+
+.web-vitals-chrome-extension-popup .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-light-grey);
+  border-top-color: var(--color-text-link);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.web-vitals-chrome-extension-popup .tab-loading span {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* ========== Accessibility: Focus Visible ========== */
+.web-vitals-chrome-extension-popup .tab-button:focus-visible,
+.web-vitals-chrome-extension-popup .theme-toggle:focus-visible,
+.web-vitals-chrome-extension-popup .sidePanel:focus-visible,
+.web-vitals-chrome-extension-popup .export-button:focus-visible,
+.web-vitals-chrome-extension-popup #open-options:focus-visible {
+  outline: 2px solid var(--color-text-link);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.web-vitals-chrome-extension-popup .tab-button:focus-visible {
+  outline-offset: -2px;
+}
+
+/* ========== Accessibility: Screen Reader Only ========== */
+.web-vitals-chrome-extension-popup .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ========== SEO v3.0: Indexability Status Badges ========== */
+.web-vitals-chrome-extension-popup .indexability-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.web-vitals-chrome-extension-popup .indexability-badge.indexable {
+  background-color: var(--color-good-muted);
+  color: var(--color-good-text);
+}
+
+.web-vitals-chrome-extension-popup .indexability-badge.blocked {
+  background-color: hsl(0 0% 63% / 0.38);
+  color: var(--color-poor-text);
+}
+
+/* ========== SEO v3.0: Redirect Chain ========== */
+.web-vitals-chrome-extension-popup .redirect-chain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: var(--color-light-grey);
+  border-radius: var(--radius-md);
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.web-vitals-chrome-extension-popup .redirect-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: var(--color-card);
+  border-radius: var(--radius-sm);
+}
+
+.web-vitals-chrome-extension-popup .redirect-step .status-code {
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-light-grey);
+}
+
+.web-vitals-chrome-extension-popup .redirect-step .status-code.redirect {
+  color: var(--color-needs-improvement-text);
+}
+
+.web-vitals-chrome-extension-popup .redirect-step .status-code.success {
+  color: var(--color-good-text);
+}
+
+.web-vitals-chrome-extension-popup .redirect-step .status-code.error {
+  color: var(--color-poor-text);
+}
+
+.web-vitals-chrome-extension-popup .redirect-arrow {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+/* ========== SEO v3.0: hreflang Tags ========== */
+.web-vitals-chrome-extension-popup .hreflang-tag {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+
+.web-vitals-chrome-extension-popup .hreflang-tag .hreflang-code {
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--color-text-link);
+}
+
+.web-vitals-chrome-extension-popup .hreflang-warning,
+.web-vitals-chrome-extension-popup .heading-warning {
+  padding: 0.75rem 1rem;
+  background-color: hsl(39 0% 50% / 0.15);
+  border-left: 3px solid var(--color-needs-improvement);
+  border-radius: var(--radius-sm);
+  color: var(--color-needs-improvement-text);
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+/* ========== SEO v3.0: Heading Outline ========== */
+.web-vitals-chrome-extension-popup .heading-outline {
+  padding: 0.75rem;
+  background-color: var(--color-light-grey);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.web-vitals-chrome-extension-popup .heading-item {
+  padding: 0.25rem 0;
+  color: var(--color-text);
+}
+
+.web-vitals-chrome-extension-popup .heading-item.skipped {
+  color: var(--color-poor-text);
+  font-weight: 600;
+}
+
+.web-vitals-chrome-extension-popup .heading-indent-1 { padding-left: 0.5rem; }
+.web-vitals-chrome-extension-popup .heading-indent-2 { padding-left: 1rem; }
+.web-vitals-chrome-extension-popup .heading-indent-3 { padding-left: 1.5rem; }
+.web-vitals-chrome-extension-popup .heading-indent-4 { padding-left: 2rem; }
+.web-vitals-chrome-extension-popup .heading-indent-5 { padding-left: 2.5rem; }
+.web-vitals-chrome-extension-popup .heading-indent-6 { padding-left: 3rem; }
+
+.web-vitals-chrome-extension-popup .heading-level {
+  display: inline-block;
+  width: 1.5rem;
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--color-text-muted);
 }

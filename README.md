@@ -124,7 +124,7 @@ service_worker.js       — Badge updates, tab management, header capture
 ### Setup
 
 ```bash
-git clone https://github.com/VANTAGhq/web-vitals-extension.git
+git clone https://github.com/vantagdev/web-vitals-extension.git
 cd web-vitals-extension
 npm install
 npm run build   # Copies web-vitals.js into src/browser_action/
@@ -230,9 +230,9 @@ For optimization guides, see:
 
 ## Contributing
 
-Bug reports and suggestions are welcome at [GitHub Issues](https://github.com/VANTAGhq/web-vitals-extension/issues).
+Bug reports and suggestions are welcome at [GitHub Issues](https://github.com/vantagdev/web-vitals-extension/issues).
 
-For metric measurement discussions, use [GitHub Discussions](https://github.com/orgs/VANTAGhq/discussions).
+For metric measurement discussions, use [GitHub Discussions](https://github.com/vantagdev/web-vitals-extension/discussions).
 
 ---
 
@@ -242,4 +242,4 @@ For metric measurement discussions, use [GitHub Discussions](https://github.com/
 
 ---
 
-Maintained by [vantag.es](https://vantag.es/) | [Report Issues](https://github.com/VANTAGhq/web-vitals-extension/issues)
+Maintained by [vantag.dev](https://vantag.dev/) | [Report Issues](https://github.com/vantagdev/web-vitals-extension/issues)

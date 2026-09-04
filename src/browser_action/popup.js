@@ -178,11 +178,15 @@ class Popup {
     }
 
     // Remove active class from all buttons and contents.
-    tabButtons.forEach(btn => btn.classList.remove('active'));
+    tabButtons.forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-selected', 'false');
+    });
     tabContents.forEach(content => content.classList.remove('active'));
 
     // Activate the selected tab and persist user selection across reloads.
     targetButton.classList.add('active');
+    targetButton.setAttribute('aria-selected', 'true');
     targetContent.classList.add('active');
     try {
       sessionStorage.setItem(Popup.ACTIVE_TAB_STORAGE_KEY, targetTab);
@@ -217,6 +221,8 @@ class Popup {
   }
 
   async loadServerInfo() {
+    const loadingEl = document.getElementById('server-loading');
+    if (loadingEl) loadingEl.style.display = 'flex';
     this.serverInfoLoaded = true;
 
     try {
@@ -248,10 +254,14 @@ class Popup {
           element.style.color = 'var(--color-poor-text)';
         }
       });
+    } finally {
+      if (loadingEl) loadingEl.style.display = 'none';
     }
   }
 
   async loadDNSInfo() {
+    const loadingEl = document.getElementById('dns-loading');
+    if (loadingEl) loadingEl.style.display = 'flex';
     this.dnsInfoLoaded = true;
 
     try {
@@ -303,10 +313,14 @@ class Popup {
 
       const subdomainsContainer = document.getElementById('dns-subdomains-container');
       if (subdomainsContainer) subdomainsContainer.style.display = 'none';
+    } finally {
+      if (loadingEl) loadingEl.style.display = 'none';
     }
   }
 
   async loadSEOInfo() {
+    const loadingEl = document.getElementById('seo-loading');
+    if (loadingEl) loadingEl.style.display = 'flex';
     this.seoInfoLoaded = true;
 
     try {
@@ -368,12 +382,88 @@ class Popup {
       document.getElementById('seo-description-length').innerText = `${seoInfo.descriptionLength} characters`;
       this.updateLengthIndicator('seo-description-length', seoInfo.descriptionLength, 120, 160);
 
-      document.getElementById('seo-keywords').innerText = seoInfo.keywords;
       document.getElementById('seo-canonical').innerText = seoInfo.canonical;
       document.getElementById('seo-robots').innerText = seoInfo.robots;
       document.getElementById('seo-language').innerText = seoInfo.language;
       document.getElementById('seo-viewport').innerText = seoInfo.viewport;
       document.getElementById('seo-charset').innerText = seoInfo.charset;
+
+      // Update Indexability Audit (v3.0)
+      const indexabilityStatus = document.getElementById('seo-indexability-status');
+      indexabilityStatus.innerText = seoInfo.indexability || 'Unknown';
+      indexabilityStatus.className = 'indexability-badge ' + (seoInfo.isIndexable ? 'indexable' : 'blocked');
+
+      document.getElementById('seo-meta-robots').innerText = seoInfo.robots || 'Not present';
+      document.getElementById('seo-x-robots-tag').innerText = seoInfo.xRobotsTag || 'Not present';
+      document.getElementById('seo-robots-txt-status').innerText = seoInfo.robotsTxtStatus || 'Unknown';
+      document.getElementById('seo-http-status').innerText = seoInfo.httpStatus || 'Unknown';
+
+      // Update Redirect Chain (v3.0)
+      const redirectSection = document.getElementById('seo-redirect-section');
+      const redirectChainEl = document.getElementById('seo-redirect-chain');
+      if (seoInfo.redirectChain && seoInfo.redirectChain.length > 0) {
+        redirectSection.style.display = 'block';
+        redirectChainEl.innerHTML = seoInfo.redirectChain.map(step => {
+          const statusClass = step.statusCode >= 300 && step.statusCode < 400 ? 'redirect' :
+                             step.statusCode >= 200 && step.statusCode < 300 ? 'success' : 'error';
+          return `
+            <div class="redirect-step">
+              <span class="status-code ${statusClass}">${step.statusCode}</span>
+              <span class="redirect-url">${step.from}</span>
+              <span class="redirect-arrow">→</span>
+              <span class="redirect-url">${step.to}</span>
+            </div>
+          `;
+        }).join('');
+      } else {
+        redirectSection.style.display = 'none';
+      }
+
+      // Update hreflang (v3.0)
+      const hreflangSection = document.getElementById('seo-hreflang-section');
+      const hreflangGrid = document.getElementById('seo-hreflang-grid');
+      const hreflangWarning = document.getElementById('seo-hreflang-warning');
+      if (seoInfo.hreflangs && seoInfo.hreflangs.length > 0) {
+        hreflangSection.style.display = 'block';
+        hreflangGrid.innerHTML = seoInfo.hreflangs.map(hl => `
+          <div class="hreflang-tag">
+            <span class="hreflang-code">${hl.hreflang}</span>
+            <span class="hreflang-url">${hl.href}</span>
+          </div>
+        `).join('');
+        hreflangWarning.style.display = (!seoInfo.hasXDefault && seoInfo.hreflangs.length > 1) ? 'block' : 'none';
+      } else {
+        hreflangSection.style.display = 'none';
+      }
+
+      // Update Heading Outline (v3.0)
+      const headingSection = document.getElementById('seo-heading-section');
+      const headingOutline = document.getElementById('seo-heading-outline');
+      const headingWarning = document.getElementById('seo-heading-warning');
+      if (seoInfo.headingOutline && seoInfo.headingOutline.length > 0) {
+        headingSection.style.display = 'block';
+        headingOutline.innerHTML = seoInfo.headingOutline.map(h => `
+          <div class="heading-item heading-indent-${h.level}">
+            <span class="heading-level">H${h.level}</span>
+            <span class="heading-text">${h.text || '(empty)'}</span>
+          </div>
+        `).join('');
+        headingWarning.style.display = seoInfo.hasSkippedLevels ? 'block' : 'none';
+      } else {
+        headingSection.style.display = 'none';
+      }
+
+      // Update Sitemap (v3.0)
+      const sitemapSection = document.getElementById('seo-sitemap-section');
+      if (seoInfo.sitemapUrl && seoInfo.sitemapUrl !== 'Not found') {
+        sitemapSection.style.display = 'block';
+        document.getElementById('seo-sitemap-type').innerText = seoInfo.sitemapUrl;
+        document.getElementById('seo-sitemap-url-count').innerText =
+          seoInfo.urlCount > 0 ? `${seoInfo.urlCount} URLs` :
+          (seoInfo.sitemapCount > 0 ? `${seoInfo.sitemapCount} sub-sitemaps` : '0');
+      } else {
+        sitemapSection.style.display = 'none';
+      }
 
       // Update Content Analysis
       document.getElementById('seo-word-count').innerText = seoInfo.wordCount;
@@ -424,10 +514,26 @@ class Popup {
     } catch (e) {
       const errorMessage = e.message || 'Unable to analyze SEO';
       console.error('SEO analysis error:', errorMessage);
+
+      // Set all fields to error state
+      const errorFields = ['seo-title', 'seo-description', 'seo-canonical', 'seo-robots',
+        'seo-indexability-status', 'seo-meta-robots', 'seo-x-robots-tag',
+        'seo-robots-txt-status', 'seo-http-status'];
+      errorFields.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.innerText = 'Error';
+          element.style.color = 'var(--color-poor-text)';
+        }
+      });
+    } finally {
+      if (loadingEl) loadingEl.style.display = 'none';
     }
   }
 
   async loadTechInfo() {
+    const loadingEl = document.getElementById('tech-loading');
+    if (loadingEl) loadingEl.style.display = 'flex';
     this.techInfoLoaded = true;
 
     try {
@@ -475,10 +581,14 @@ class Popup {
         document.getElementById(id).innerText = 'Error loading data';
         document.getElementById(id).style.color = 'var(--color-poor-text)';
       });
+    } finally {
+      if (loadingEl) loadingEl.style.display = 'none';
     }
   }
 
   async loadA11yInfo() {
+    const loadingEl = document.getElementById('a11y-loading');
+    if (loadingEl) loadingEl.style.display = 'flex';
     this.a11yInfoLoaded = true;
 
     try {
@@ -557,6 +667,8 @@ class Popup {
     } catch (e) {
       const errorMessage = e.message || 'Unable to analyze Accessibility';
       console.error('A11y analysis error:', errorMessage);
+    } finally {
+      if (loadingEl) loadingEl.style.display = 'none';
     }
   }
 
@@ -732,7 +844,7 @@ class Popup {
     // LCP suggestions
     if (lcp !== undefined) {
       if (lcp > 4000) {
-        suggestions.push(`LCP is ${(lcp / 1000).toFixed(1)}s (poor). Preload the LCP image with \`<link rel="preload" as="image"\`\`, optimize and compress images (WebP/AVIF), implement responsive images with srcset, and consider using an image CDN.`);
+        suggestions.push(`LCP is ${(lcp / 1000).toFixed(1)}s (poor). Preload the LCP image with <link rel="preload" as="image">, optimize and compress images (WebP/AVIF), implement responsive images with srcset, and consider using an image CDN.`);
       } else if (lcp > 2500) {
         suggestions.push(`LCP is ${(lcp / 1000).toFixed(1)}s (needs improvement). Preload the hero image, remove render-blocking resources, and ensure the LCP element is not lazily loaded.`);
       }
@@ -750,9 +862,9 @@ class Popup {
     // INP suggestions
     if (inp !== undefined) {
       if (inp > 500) {
-        suggestions.push(`INP is ${Math.round(inp)}ms (poor). Break up long JavaScript tasks into smaller chunks with \`setTimeout\` or \`requestIdleCallback\`, move heavy computation off the main thread with Web Workers, and debounce event handlers.`);
+        suggestions.push(`INP is ${Math.round(inp)}ms (poor). Break up long JavaScript tasks into smaller chunks with setTimeout or requestIdleCallback, move heavy computation off the main thread with Web Workers, and debounce event handlers.`);
       } else if (inp > 200) {
-        suggestions.push(`INP is ${Math.round(inp)}ms (needs improvement). Reduce the amount of JavaScript executing on user interaction, optimize event listeners, and consider using \`content-visibility: auto\` for off-screen content.`);
+        suggestions.push(`INP is ${Math.round(inp)}ms (needs improvement). Reduce the amount of JavaScript executing on user interaction, optimize event listeners, and consider using content-visibility: auto for off-screen content.`);
       }
     }
 
@@ -761,7 +873,7 @@ class Popup {
       if (fcp > 3000) {
         suggestions.push(`FCP is ${(fcp / 1000).toFixed(1)}s (poor). Eliminate render-blocking resources by inlining critical CSS and deferring non-critical stylesheets, reduce server response time, and preload critical fonts.`);
       } else if (fcp > 1800) {
-        suggestions.push(`FCP is ${(fcp / 1000).toFixed(1)}s (needs improvement). Defer non-critical JavaScript, minimize unused CSS, and ensure text remains visible during webfont load with \`font-display: swap\`.`);
+        suggestions.push(`FCP is ${(fcp / 1000).toFixed(1)}s (needs improvement). Defer non-critical JavaScript, minimize unused CSS, and ensure text remains visible during webfont load with font-display: swap.`);
       }
     }
 

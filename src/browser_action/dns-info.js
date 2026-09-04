@@ -1,5 +1,5 @@
 /*
- Copyright 2025 vantag.es. All Rights Reserved.
+ Copyright 2025 vantag.dev. All Rights Reserved.
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -26,10 +26,10 @@ export class DNSInfo {
     }
   }
 
-  async fetchWithTimeout(url, options = {}, timeout = 8000) {
+  async fetchWithTimeout(url, options = {}, timeout = 2000) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
-    
+
     try {
       const response = await fetch(url, {
         ...options,
@@ -110,8 +110,8 @@ export class DNSInfo {
       // DNS servers often include the CNAME chain in the answer section of A queries.
       const detectedCNAMEs = this.extractCNAMEsFromAnswers(cnameRecords, aRecords, aaaaRecords);
 
-      // Discover common subdomains
-      const subdomains = await this.discoverSubdomains();
+      // Discover subdomains non-blockingly (may return empty if slow)
+      const subdomains = await this.discoverSubdomainsQuick();
 
       return {
         domain: this.hostname,
@@ -161,15 +161,15 @@ export class DNSInfo {
     return Array.from(cnames).join(', ');
   }
 
-  async discoverSubdomains() {
-    // Use Certificate Transparency logs (crt.sh) for real subdomain discovery.
+  async discoverSubdomainsQuick() {
+    // Quick subdomain discovery with short timeout (1.5s) - returns empty if slow
     const rootDomain = this.getRootDomain();
 
     try {
       const response = await this.fetchWithTimeout(
         `https://crt.sh/?q=${rootDomain}&output=json`,
         { headers: { 'Accept': 'application/json' } },
-        8000
+        1500
       );
 
       if (!response.ok) return [];
@@ -181,7 +181,6 @@ export class DNSInfo {
       const uniqueSubs = new Set();
       data.forEach(entry => {
         const rawName = entry.name_value || '';
-        // crt.sh can return multiple names separated by newlines.
         rawName.split('\n').forEach(name => {
           const clean = name.trim().toLowerCase();
           if (!clean || clean.startsWith('*.')) return;
@@ -192,11 +191,11 @@ export class DNSInfo {
         });
       });
 
-      // Limit to first 15 unique subdomains to avoid overwhelming the UI/DNS.
-      const candidates = Array.from(uniqueSubs).slice(0, 15);
+      // Limit to first 5 unique subdomains for speed
+      const candidates = Array.from(uniqueSubs).slice(0, 5);
       if (candidates.length === 0) return [];
 
-      // Resolve each discovered subdomain to its A record (parallel with timeout).
+      // Resolve each discovered subdomain to its A record (parallel with short timeout)
       const results = await Promise.all(
         candidates.map(sub => this.resolveSubdomainIP(sub))
       );
@@ -205,6 +204,11 @@ export class DNSInfo {
     } catch (_e) {
       return [];
     }
+  }
+
+  async discoverSubdomains() {
+    // Full subdomain discovery (deprecated, kept for compatibility)
+    return this.discoverSubdomainsQuick();
   }
 
   getRootDomain() {
@@ -221,7 +225,7 @@ export class DNSInfo {
       const response = await this.fetchWithTimeout(
         `https://dns.google/resolve?name=${subdomain}&type=A`,
         { headers: { 'Accept': 'application/dns-json' } },
-        3000
+        1500
       );
 
       if (!response.ok) return null;

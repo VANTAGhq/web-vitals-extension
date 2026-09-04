@@ -83,7 +83,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 
   if (
-    changeInfo.status == 'complete' &&
+    changeInfo.status === 'complete' &&
     tab.url.startsWith('http') &&
     tab.active
   ) {
@@ -337,7 +337,7 @@ chrome.storage.onChanged.addListener(logStorageChange);
 async function clearOldCacheBackground(tabId) {
   if (!(await doesTabExist(tabId))) {
     chrome.storage.local.remove([tabId]);
-  };
+  }
 }
 
 async function clearOldCache() {
@@ -364,8 +364,9 @@ self.addEventListener('activate', _ => {
   clearOldCache();
 });
 
-// Store response headers for tech detection
+// Store response headers, status codes, and redirect chains for SEO analysis
 const responseHeadersCache = new Map();
+const redirectChains = new Map(); // url -> [{from, to, statusCode}]
 
 chrome.webRequest.onCompleted.addListener(
   (details) => {
@@ -374,11 +375,15 @@ chrome.webRequest.onCompleted.addListener(
       details.responseHeaders.forEach(header => {
         headers[header.name.toLowerCase()] = header.value;
       });
-      responseHeadersCache.set(details.url, headers);
+      responseHeadersCache.set(details.url, {
+        headers,
+        statusCode: details.statusCode
+      });
 
       // Clean up old entries after 5 minutes
       setTimeout(() => {
         responseHeadersCache.delete(details.url);
+        redirectChains.delete(details.url);
       }, 5 * 60 * 1000);
     }
   },
@@ -386,12 +391,69 @@ chrome.webRequest.onCompleted.addListener(
   ['responseHeaders']
 );
 
+// Track redirect chains for main_frame requests
+// Use a temporary map to build the chain, then save under final URL when request completes
+const pendingRedirects = new Map();
+
+chrome.webRequest.onBeforeRedirect.addListener(
+  (details) => {
+    if (details.type === 'main_frame') {
+      // Start or extend the chain for this requestId
+      let chain = pendingRedirects.get(details.requestId) || [];
+      chain.push({
+        from: details.url,
+        to: details.redirectUrl,
+        statusCode: details.statusCode
+      });
+      pendingRedirects.set(details.requestId, chain);
+    }
+  },
+  { urls: ['<all_urls>'] }
+);
+
+// When the final request completes, save the chain under the final URL
+chrome.webRequest.onCompleted.addListener(
+  (details) => {
+    if (details.type === 'main_frame') {
+      const chain = pendingRedirects.get(details.requestId);
+      if (chain && chain.length > 0) {
+        // Save under the final URL (details.url is the URL that completed)
+        redirectChains.set(details.url, chain);
+        pendingRedirects.delete(details.requestId);
+      }
+    }
+  },
+  { urls: ['<all_urls>'] }
+);
+
 // Handle requests for response headers from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'GET_RESPONSE_HEADERS') {
-    const headers = responseHeadersCache.get(request.url) || {};
-    sendResponse({ headers });
+    const cached = responseHeadersCache.get(request.url);
+    const headers = cached?.headers || {};
+    const statusCode = cached?.statusCode || null;
+    const redirectChain = redirectChains.get(request.url) || [];
+    sendResponse({ headers, statusCode, redirectChain });
   }
+
+  // Fetch SEO resources (robots.txt, sitemap.xml) from the service worker
+  // This bypasses CSP restrictions since SW has host_permissions: *://*/*
+  if (request.type === 'FETCH_SEO_RESOURCE') {
+    fetch(request.url, {
+      method: 'GET',
+      headers: { 'Accept': request.accept || '*/*' }
+    })
+    .then(response => response.text().then(text => ({
+      ok: response.ok,
+      status: response.status,
+      text: text
+    })))
+    .then(data => sendResponse(data))
+    .catch(error => sendResponse({ ok: false, status: 0, error: error.message }));
+
+    return true; // Keep the message channel open for async response
+  }
+
   return true; // Keep the message channel open for async response
 });
 
