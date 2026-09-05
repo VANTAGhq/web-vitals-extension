@@ -2,7 +2,7 @@
   "name": "Web Vitals",
   "version": "3.0.0",
   "manifest_version": 3,
-  "description": "Measure metrics for a healthy site, Server Info, Web info, SEO Analysis & Accessibility checks.",
+  "description": "Complete website analysis in one popup: Core Web Vitals, SEO & indexability, accessibility, DNS, server info and tech stack.",
   "homepage_url": "https://vantag.dev/",
   "icons": {
     "128": "icons/vitals128w.png",
